@@ -1,13 +1,11 @@
-import './App.css';
-import Index from './pages/Index';
+import React from "react";
+import "./App.css";
+import Index from "./pages/Index";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        
-      </header>
-      <Index/>
+      <Index />
     </div>
   );
 }
