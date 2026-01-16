@@ -1,0 +1,123 @@
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal container (wider) */
+.modal {
+  background: #5a86add0;
+  padding: 2rem;          /* padding around content wrapper */
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;       /* wider modal box */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+/* Inner content wrapper */
+.modal-content {
+  max-width: 500px;       /* text/content width */
+  margin: 0 auto;         /* center content */
+  padding: 0 1.5rem;      /* horizontal padding for text */
+}
+
+/* Titles without spacing between them */
+.modal-title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1; /* remove extra line spacing */
+}
+
+.modal-title-container h2 {
+  font-family: 'Mea Culpa', cursive;
+  font-weight: 600;
+  font-size: 5rem;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  line-height: 1; /* remove spacing */
+}
+
+.modal-title-container h3 {
+  font-family: 'DM serif text', serif; /* fixed typo */
+  font-size: 2.2rem;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  line-height: 1; /* remove spacing */
+}
+
+.modal-title-container h2 {
+  font-size: 5rem;  /* larger h2 */
+}
+
+.modal-title-container h3 {
+  font-size: 2.2rem;    /* smaller h3 */
+}
+
+/* Input fields */
+.modal input,
+.modal select {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  color: black;
+  background-color: white;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.75rem;
+}
+
+/* Submit button */
+.modal button[type="submit"] {
+  padding: 0.75rem 1rem;
+  background-color: #f1f1f1;
+  color: hsla(221, 79%, 41%, 0.957);
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal button[type="submit"]:hover {
+  background-color: #ffffff;
+}
+
+/* Close button always visible */
+.modal .close-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  color: #1a1a1a;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modal .close-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Success and error messages */
+.text-green-600 {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.text-red-600 {
+  text-align: center;
+  margin-top: 0.5rem;
+}
