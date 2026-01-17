@@ -1,140 +1,199 @@
+/* =========================================
+   1. BASE & RESET
+   ========================================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #f4f7f9;
+  font-family: 'DM Serif Text', serif;
+}
+
+/* =========================================
+   2. ENVELOPE LANDING
+   ========================================= */
 .envelope-landing {
   position: fixed;
   inset: 0;
-  background: #f0f7ff; /* Light blue watercolor base */
+  background: radial-gradient(circle, #fdfbfb 0%, #dbe9f4 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  overflow: hidden;
 }
 
 .envelope-wrapper {
   position: relative;
-  width: 320px;
-  height: 220px;
+  width: 350px;
+  height: 230px;
   cursor: pointer;
-  perspective: 1000px;
+  perspective: 1500px;
 }
 
 .envelope {
   position: relative;
   width: 100%;
   height: 100%;
-  background: #ffffff;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: #9DB2BF; 
+  box-shadow: 0 20px 40px rgba(39, 55, 77, 0.15);
 }
 
 .top-flap {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #e1e8f0;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #9DB2BF 0%, #8ca0ae 100%);
   clip-path: polygon(0 0, 50% 50%, 100% 0);
-  z-index: 3;
-  transition: transform 0.6s ease;
+  z-index: 10; 
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.2s;
   transform-origin: top;
 }
 
-.front {
+.front-cover {
   position: absolute;
   inset: 0;
-  background: #ffffff;
-  clip-path: polygon(0 50%, 50% 100%, 100% 50%, 100% 100%, 0 100%);
-  z-index: 4;
+  background: #9DB2BF;
+  clip-path: polygon(0 38%, 100% 38%, 100% 100%, 0 100%);
+  z-index: 8; 
 }
+
+.is-open .top-flap { transform: rotateX(180deg); z-index: 1; }
+.is-open .top-flap, .is-open .front-cover, .is-open .envelope { pointer-events: none; }
 
 .seal {
   position: absolute;
-  bottom: 15%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 55px;
-  height: 55px;
-  background: #5c7ba8;
+  top: 38%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 11;
+  transition: opacity 0.4s ease;
+}
+
+.wax-texture {
+  width: 55px; height: 55px;
+  background: #27374D;
   border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border: 1.5px solid #C5A059;
+}
+
+.seal-initials { color: #C5A059; font-size: 0.85rem; font-weight: bold; }
+
+/* =========================================
+   3. THE PAPER & BIGGER FLOWERS
+   ========================================= */
+.pocket-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden; 
   z-index: 5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.seal-initials {
-  color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
-}
+.is-open .pocket-container { overflow: visible; }
 
-/* The Letter Inside */
 .letter-preview {
   position: absolute;
-  top: 5px;
-  left: 10px;
-  width: 300px;
-  height: 210px;
-  background: white;
-  z-index: 2;
-  transition: transform 0.8s ease;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  border: 1px solid #eee;
-}
-
-/* Animation triggers */
-.is-open .top-flap {
-  transform: rotateX(180deg);
-  z-index: 1;
+  top: 120px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 310px;
+  height: 100px; 
+  background: #ffffff;
+  z-index: 5;
+  transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1), 
+              height 1.3s ease-out,
+              z-index 0s 0.8s;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 .is-open .letter-preview {
-  transform: translateY(-130px);
-  z-index: 10;
+  transform: translate(-50%, -390px); 
+  height: 410px; 
+  z-index: 20;
+  box-shadow: 0 25px 60px rgba(39, 55, 77, 0.2);
+  pointer-events: auto;
 }
 
-.letter-content .script-font {
+.flower-accent {
+  position: absolute;
+  color: #C5A059;
+  font-size: 2.2rem; 
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.top-right { top: 10px; right: 10px; transform: rotate(15deg); }
+.bottom-left { bottom: 10px; left: 10px; transform: rotate(-165deg); }
+.top-left { top: 10px; left: 10px; transform: rotate(-15deg); }
+.bottom-right { bottom: 10px; right: 10px; transform: rotate(165deg); }
+
+.letter-content {
+  text-align: center;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  opacity: 0;
+  transition: opacity 0.6s 0.8s;
+}
+
+.is-open .letter-content { opacity: 1; }
+
+/* =========================================
+   4. TEXT & MINIMALIST BUTTON
+   ========================================= */
+.invite-question {
+  font-size: 0.65rem;
+  color: #8EACCD;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 5px;
+}
+
+.script-font {
   font-family: 'Mea Culpa', cursive;
-  color: #5c7ba8;
+  font-size: 2.1rem;
+  color: #27374D;
   margin: 0;
-  font-size: 1.8rem;
+}
+
+.and-text {
+  font-style: italic;
+  color: #C5A059;
+  margin: 4px 0;
+  font-size: 1rem;
 }
 
 .date-font {
   font-size: 0.7rem;
-  letter-spacing: 2px;
-  color: #8fa3c2;
-  margin: 5px 0 15px;
+  color: #526D82;
+  margin: 10px 0 20px 0;
+  letter-spacing: 1px;
 }
 
 .enter-btn {
-  background: #5c7ba8;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 20px;
+  background: transparent;
+  color: #27374D;
+  border: 1px solid #27374D;
+  padding: 10px 24px;
   font-size: 0.7rem;
-  font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
 }
 
-.enter-btn:hover {
-  background: #4a6a96;
-}
+.enter-btn:hover { background: #27374D; color: #ffffff; }
 
-.instruction-text {
-  margin-top: 20px;
-  font-size: 0.9rem;
-  color: #5c7ba8;
-  animation: fadePulse 2s infinite;
-}
+.is-open .seal { opacity: 0; }
+.instruction-container { margin-top: 50px; text-align: center; }
 
-@keyframes fadePulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+@media (max-width: 480px) {
+  .envelope-wrapper { width: 300px; height: 200px; }
+  .is-open .letter-preview { transform: translate(-50%, -320px); }
 }

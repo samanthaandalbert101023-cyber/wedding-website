@@ -9,6 +9,8 @@ import cover3 from '../img/3.JPG';
 import churchQR from '../img/church_qr.png';
 import venueQR from '../img/venue_qr.png';
 
+import weddingSong from "../song/ido.mp3"
+
 import './Index.css';
 
 const normalize = (str = '') => str.toLowerCase().replace(/\s+/g, ' ').trim();
@@ -32,10 +34,23 @@ const Index = () => {
   const [selectedGuest, setSelectedGuest] = useState(null);
   const [groupGuests, setGroupGuests] = useState([]);
   const [checkedGuests, setCheckedGuests] = useState([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
 
   // Helper to scroll to specific page
   const scrollToSection = (index) => {
     pageRefs[index].current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+
+  const toggleMusic = () => {
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
   };
 
   const fetchGuestList = async () => {
@@ -150,6 +165,7 @@ const Index = () => {
 
   return (
     <div className="app-root">
+      <audio ref={audioRef} src={weddingSong} loop />
       {loadingGuests && (
         <div className="heart-loader">
           {Array.from({ length: 40 }).map((_, i) => (
@@ -172,6 +188,10 @@ const Index = () => {
       {/* STICKY NAV WITH PAGE LOCATORS */}
       <div className="sticky-nav">
         <div className="nav-controls">
+          <button className="music-toggle" onClick={toggleMusic}>
+            {isPlaying ? '🔊' : '🔇'}
+          </button>
+
            <button onClick={() => scrollToSection(0)}>Home</button>
            <button onClick={() => scrollToSection(1)}>Dates</button>
            <button onClick={() => scrollToSection(2)}>Program</button>
@@ -185,7 +205,10 @@ const Index = () => {
       <div ref={pageRefs[0]} className="page hero" style={{ backgroundImage: `url(${image1})` }}>
         <div className="overlay" />
         <div className="hero-text">
+          <div className="hero-welcome">Welcome to</div>
           <h1>Albert & Samantha</h1>
+          <div className="hero-wedding">Wedding</div>
+          <div className="hero-rsvp-message">Please RSVP by January 30th</div>
         </div>
       </div>
 
