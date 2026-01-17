@@ -1,66 +1,92 @@
 /* =========================
-   GLOBAL STYLES
+   RESET
 ========================= */
-:root {
-  font-family: 'DM Serif Text', serif;
-  color: white;
-  background-color: #242424;
+* {
+  box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
-  padding: 0;
-  min-height: 100vh;
+  background: #242424;
+  color: white;
+  font-family: 'DM Serif Text', serif;
   overflow-x: hidden;
-  background-color: #242424;
-  color: white;
 }
 
-h1, h2, h3, h4, h5, h6, p, span, a, button {
-  color: white;
+.app-root {
+  width: 100%;
 }
-h2 {
-  font-family: 'Mea Culpa', cursive;
-  margin-top: 4rem;
-  font-size: 6rem;
-  color: #ffffff;
-}
-h6 {
-  font-family: 'DM Serif Text', serif;
-  font-size: 1.5rem;
-  margin-top: 0rem;
-  color: #ffffff;
-}
-h7 {
-  font-family: 'Mea Culpa', cursive;
-  margin-top: 10rem;
-  font-size: 6rem;
-  color: #ffffff;
-}
-
-.hero-text {
-  position: relative;
-  text-align: center;
-  margin-top: 22rem; /* pushes the whole block lower */
-}
-
-.hero-names {
-  font-family: 'Mea Culpa', cursive;
-  font-size: 6rem;   /* elegant script for names */
-  margin-bottom: 1rem;
-  color: #fff;
-}
-
-.hero-subtitle {
-  font-family: 'DM Serif Text', serif;
-  font-size: 1.5rem;
-  margin-bottom: .5rem;
-  color: #fff;
-}
-
 
 /* =========================
-   STICKY NAVIGATION
+   FULLSCREEN LOADER
+========================= */
+.fullscreen-loader {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-content {
+  text-align: center;
+}
+
+.loader-content p {
+  margin-top: 1rem;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+}
+
+/* Spinner */
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   PAGE BASE
+========================= */
+.page {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.25rem;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+
+.page.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+}
+
+/* =========================
+   STICKY NAV
 ========================= */
 .sticky-nav {
   position: fixed;
@@ -69,345 +95,112 @@ h7 {
   transform: translateX(-50%);
   display: flex;
   gap: 0.5rem;
-  z-index: 200;
+  z-index: 1000;
 }
 
 .sticky-nav button {
-  background-color: rgba(255, 255, 255, 0.5);
-  color: black;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255,255,255,0.9);
+  color: #000;
   font-weight: 600;
   font-size: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.03rem;
-  transition: all 0.3s ease;
-}
-
-.sticky-nav button:hover,
-.sticky-nav button.active {
-  background-color: rgba(255, 255, 255, 0.8);
-  color: black;
-  box-shadow: 0 0 12px rgba(100, 150, 255, 0.7);
-  transform: translateY(-2px);
 }
 
 /* =========================
-   PAGE CONTAINERS
-========================= */
-
-.page.countdown.slim {
-  min-height: 40vh;   /* slimmer than full screen */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.page.venues.slim {
-  min-height: 50vh;   /* slimmer than full screen */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.venue-wrapper {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-}
-
-.venue-container {
-  text-align: center;
-  background: rgba(255,255,255,0.1); /* subtle background */
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2); /* soft shadow */
-}
-.page {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-size: cover;
-  background-position: center;
-  transition: opacity 1s ease, transform 0.8s ease;
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.page.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Overlay for images */
-.page .overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  z-index: 10;
-}
-
-/* =========================
-   HERO SECTION
+   HERO
 ========================= */
 .hero-text {
-  position: relative;
-  z-index: 20;
+  z-index: 2;
   text-align: center;
 }
 
-.hero-text h1 {
+.hero-names {
   font-family: 'Mea Culpa', cursive;
-  font-size: clamp(5rem, 10vw, 10rem);
-  text-shadow: 2px 2px 10px rgba(0,0,0,0.7);
-  margin: 0;
+  font-size: clamp(3rem, 8vw, 6rem);
 }
 
-.hero-text h3 {
-  font-size: clamp(1.5rem, 2vw, 3rem);
-  text-shadow: 1px 1px 8px rgba(0,0,0,0.5);
-  margin: 1rem 0;
-}
-
-.hero-subtext {
-  font-size: clamp(1rem, 1vw, 2rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  margin-top: 1rem;
+.hero-subtitle {
+  letter-spacing: 0.15em;
+  font-size: 0.9rem;
 }
 
 /* =========================
-   COUNTDOWN SECTION
-========================= */
-.countdown-content {
-  position: relative;
-  z-index: 20;
-  text-align: center;
-  gap: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-shadow: 0px 4px 10px rgba(0,0,0,0.8);
-}
-
-/* =========================
-   VENUES SECTION
+   VENUES
 ========================= */
 .venue-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7rem;
-  justify-content: center;
-}
-
-.venue-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 1s ease, transform 0.8s ease;
-}
-
-.venue-container.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.venue-container img {
-  width: 250px;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-}
-
-.venue-container a {
-  color: #64a0ff;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.venue-container a:hover {
-  text-decoration: underline;
-}
-
-/* =========================
-   ENTROUAGE SECTION
-========================= */
-.entourage-list {
-  text-align: center;
-  max-width: 800px;
-  line-height: .2;
-}
-
-/* =========================
-   GALLERY SECTION
-========================= */
-.gallery-grid {
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  max-width: 1000px;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 360px;
 }
 
-.gallery-grid img {
+.venue-wrapper img {
   width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  border-radius: 12px;
 }
 
 /* =========================
    RSVP MODAL
 ========================= */
 .rsvp-modal {
-  background-color: rgba(0,0,0,0.95);
-  color: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 90%;
+  width: calc(100vw - 2rem);
+  max-width: 420px;
+  padding: 1.25rem;
+  border-radius: 14px;
 }
 
 .rsvp-modal input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 0.85rem 1rem;
+  font-size: 16px;
+  border-radius: 10px;
   margin-bottom: 0.75rem;
 }
 
-.rsvp-modal button {
-  width: 100%;
-  background-color: #6495ff; /* blue glow instead of gold */
-  color: white;
-  font-weight: bold;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.rsvp-modal button:hover {
-  box-shadow: 0 0 10px rgba(100, 150, 255, 0.7);
-  transform: translateY(-2px);
-}
-
-
-
-/* ENTROURAGE PAGE STYLES */
-
-.page.entourage {
-  padding: 0rem;
-  background-color: #a3b5c6; /* dusty blue */
-  color: #ffffff; /* default text color for readability */
-}
-
-.entourage-title {
-  font-family: 'Mea Culpa', cursive;
-  font-size: 7rem;
-  text-align: center;
-  margin-bottom: rem;
-  color: #000000; /* contrasting title color */
-  border-bottom: 2px solid #000000;
-  padding-bottom: 4rem;
-}
-
-h3 {
-  font-family: 'Mea Culpa', cursive;
-  font-size: 2rem;
-  margin-top: 1rem;
-  color: #000000;
-}
-
-.name {
-  font-family: 'DM Serif Text', serif;
-  font-size: 1.1rem;
-  margin: 0;
-  line-height: 1.4;
-  color: #000000; /* ensures white text on dusty blue */
-  text-align: center; /* center all names */
-}
-
-.role-title {
-  font-family: 'Mea Culpa', cursive;
-  font-size: 2rem;
-  margin-bottom: 10px;
-  text-align: center;
-  color: #000000;
-}
-
-/* GRID LAYOUTS */
-.sponsors-grid {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.sponsor-column {
-  flex: 1;
-}
-
-.two-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin-top: 1rem;
-}
-
-.three-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.flower-girls {
-  text-align: center;
-}
-
-
-/* Radio button aligned with text */
+/* =========================
+   DROPDOWN (WHITE)
+========================= */
 .guest-options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  overflow: hidden;
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
 .guest-option {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  color: #222;
+  font-size: 0.95rem;
   cursor: pointer;
-  font-size: 1rem;
+  border-bottom: 1px solid #eee;
 }
 
-.guest-option input[type="radio"] {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+.guest-option:hover {
+  background: #f2f5ff;
 }
 
-/* Responsive adjustment */
-@media (max-width: 480px) {
-  .guest-option {
-    font-size: 0.9rem;
+/* =========================
+   TABLET
+========================= */
+@media (min-width: 768px) {
+  .venue-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 720px;
   }
+}
 
-  .guest-option input[type="radio"] {
-    width: 16px;
-    height: 16px;
+/* =========================
+   DESKTOP
+========================= */
+@media (min-width: 1024px) {
+  .venue-wrapper {
+    max-width: 900px;
+    gap: 2.5rem;
   }
 }

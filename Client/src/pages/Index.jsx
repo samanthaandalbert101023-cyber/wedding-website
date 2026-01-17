@@ -11,25 +11,32 @@ import Reception from '../img/reception.png';
 
 import './Index.css';
 
+/* ===============================
+   HELPERS
+================================ */
 const normalize = (str = '') =>
-  str
-    .toString()
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+  str.toLowerCase().replace(/\s+/g, ' ').trim();
 
 const Index = () => {
+  /* ===============================
+     API
+  ================================ */
+  const BASE_URL =
+    window.location.hostname === 'localhost'
+      ? 'http://localhost:5000'
+      : 'https://wedding-website1.onrender.com';
 
-  const BASE_URL = 'https://wedding-website1.onrender.com';
   const [, , fetchGuest] = useGET(`${BASE_URL}/api/guestlist`, false);
 
+  /* ===============================
+     STATE
+  ================================ */
   const [openModal, setOpenModal] = useState(false);
-
   const [allGuests, setAllGuests] = useState([]);
   const [guestName, setGuestName] = useState('');
   const [dropDown, setDropDown] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
-  const [isLoadingGuests, setIsLoadingGuests] = useState(false);
+  const [loadingGuests, setLoadingGuests] = useState(false);
 
   const [openListModal, setOpenListModal] = useState({
     isActive: false,
@@ -37,27 +44,24 @@ const Index = () => {
   });
 
   /* ===============================
-     OPEN MODAL → FETCH ONCE
-  =============================== */
+     OPEN RSVP → FETCH ONCE
+  ================================ */
   const handleOpenModal = async () => {
     setOpenModal(true);
 
     if (allGuests.length === 0) {
-      setIsLoadingGuests(true);
+      setLoadingGuests(true);
       try {
         const resp = await fetchGuest(`${BASE_URL}/api/guestlist`);
-
-        // ✅ Normalize ONCE
-        const cleaned = (Array.isArray(resp) ? resp : []).map(g => ({
+        const cleaned = (resp || []).map(g => ({
           ...g,
-          _normalizedName: normalize(g.FullName),
+          _n: normalize(g.FullName),
         }));
-
         setAllGuests(cleaned);
       } catch (err) {
-        console.error('Failed to fetch guest list', err);
+        console.error(err);
       } finally {
-        setIsLoadingGuests(false);
+        setLoadingGuests(false);
       }
     }
   };
@@ -70,35 +74,25 @@ const Index = () => {
   };
 
   /* ===============================
-     LOCAL SEARCH (FIXED)
-  =============================== */
+     LOCAL SEARCH
+  ================================ */
   const handleOnChange = (e) => {
     const value = e.target.value;
     setGuestName(value);
     setSelectedGuest(null);
 
-    const search = normalize(value);
-
-    if (search.length < 2) {
+    const q = normalize(value);
+    if (q.length < 2) {
       setDropDown([]);
       return;
     }
 
-    // 1️⃣ startsWith first
-    const startsWith = allGuests.filter(g =>
-      g._normalizedName.startsWith(search)
-    );
-
-    // 2️⃣ then includes (excluding duplicates)
+    const startsWith = allGuests.filter(g => g._n.startsWith(q));
     const includes = allGuests.filter(
-      g =>
-        !g._normalizedName.startsWith(search) &&
-        g._normalizedName.includes(search)
+      g => !g._n.startsWith(q) && g._n.includes(q)
     );
 
-    const results = [...startsWith, ...includes].slice(0, 8);
-
-    setDropDown(results);
+    setDropDown([...startsWith, ...includes].slice(0, 8));
   };
 
   const handleSelectGuest = (guest) => {
@@ -109,7 +103,7 @@ const Index = () => {
 
   /* ===============================
      SUBMIT
-  =============================== */
+  ================================ */
   const handleOnSubmit = (e) => {
     e.preventDefault();
 
@@ -126,18 +120,17 @@ const Index = () => {
 
   /* ===============================
      SCROLL EFFECT
-  =============================== */
+  ================================ */
   useEffect(() => {
     const sections = document.querySelectorAll('.page');
 
     const observer = new IntersectionObserver(
-      entries => {
+      entries =>
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
           }
-        });
-      },
+        }),
       { threshold: 0.3 }
     );
 
@@ -147,28 +140,47 @@ const Index = () => {
 
   /* ===============================
      RENDER
-  =============================== */
+  ================================ */
   return (
-    <div style={{ fontFamily: "'DM Serif Text', serif", color: 'white' }}>
+    <div className="app-root">
 
+      {/* 🔵 FULLSCREEN LOADER */}
+      {loadingGuests && (
+        <div className="fullscreen-loader">
+          <div className="loader-content">
+            <span className="spinner" />
+            <p>Loading guest list…</p>
+          </div>
+        </div>
+      )}
+
+      {/* STICKY NAV */}
       <div className="sticky-nav">
+        <button>Venues</button>
+        <button>Gallery</button>
         <button onClick={handleOpenModal}>RSVP</button>
       </div>
 
+      {/* HERO */}
       <div className="page hero" style={{ backgroundImage: `url(${image1})` }}>
         <div className="overlay" />
         <div className="hero-text">
-          <h1>Samantha & Albert</h1>
+          <h1 className="hero-names">Samantha & Albert</h1>
+          <p className="hero-subtitle">ARE GETTING MARRIED</p>
         </div>
       </div>
 
+      {/* COUNTDOWN */}
       <div className="page countdown slim" style={{ backgroundImage: `url(${image2})` }}>
         <Countdown />
       </div>
 
+      {/* VENUES */}
       <div className="page venues slim" style={{ backgroundImage: `url(${cover3})` }}>
-        <img src={Ceremony} alt="Ceremony" />
-        <img src={Reception} alt="Reception" />
+        <div className="venue-wrapper">
+          <img src={Ceremony} alt="Ceremony" />
+          <img src={Reception} alt="Reception" />
+        </div>
       </div>
 
       {/* RSVP MODAL */}
@@ -178,30 +190,36 @@ const Index = () => {
         onClose={handleCloseModal}
         Children={
           <form onSubmit={handleOnSubmit} autoComplete="off">
+            <p className="rsvp-text">
+              If you're responding for you or your family, you’ll be able to RSVP for everyone.
+            </p>
+
             <input
               placeholder="Full Name"
               value={guestName}
               onChange={handleOnChange}
             />
 
-            {isLoadingGuests && <p>Loading guest list…</p>}
-
-            {dropDown.map((item) => (
-              <div
-                key={item.docId}   // ✅ ALWAYS UNIQUE
-                className="guest-option"
-                onClick={() => handleSelectGuest(item)}
-              >
-                {item.FullName}
+            {dropDown.length > 0 && (
+              <div className="guest-options">
+                {dropDown.map(g => (
+                  <div
+                    key={g.id}
+                    className="guest-option"
+                    onClick={() => handleSelectGuest(g)}
+                  >
+                    {g.FullName}
+                  </div>
+                ))}
               </div>
-            ))}
-
+            )}
 
             <button type="submit">FIND YOUR INVITATION</button>
           </form>
         }
       />
 
+      {/* CONFIRM MODAL */}
       <RSVPModal
         isOpen={openListModal.isActive}
         title="Samantha & Albert"
