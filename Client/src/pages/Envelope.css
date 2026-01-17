@@ -1,0 +1,140 @@
+.envelope-landing {
+  position: fixed;
+  inset: 0;
+  background: #f0f7ff; /* Light blue watercolor base */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  overflow: hidden;
+}
+
+.envelope-wrapper {
+  position: relative;
+  width: 320px;
+  height: 220px;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.envelope {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.top-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #e1e8f0;
+  clip-path: polygon(0 0, 50% 50%, 100% 0);
+  z-index: 3;
+  transition: transform 0.6s ease;
+  transform-origin: top;
+}
+
+.front {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  clip-path: polygon(0 50%, 50% 100%, 100% 50%, 100% 100%, 0 100%);
+  z-index: 4;
+}
+
+.seal {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55px;
+  height: 55px;
+  background: #5c7ba8;
+  border-radius: 50%;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.seal-initials {
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* The Letter Inside */
+.letter-preview {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  width: 300px;
+  height: 210px;
+  background: white;
+  z-index: 2;
+  transition: transform 0.8s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 1px solid #eee;
+}
+
+/* Animation triggers */
+.is-open .top-flap {
+  transform: rotateX(180deg);
+  z-index: 1;
+}
+
+.is-open .letter-preview {
+  transform: translateY(-130px);
+  z-index: 10;
+}
+
+.letter-content .script-font {
+  font-family: 'Mea Culpa', cursive;
+  color: #5c7ba8;
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.date-font {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: #8fa3c2;
+  margin: 5px 0 15px;
+}
+
+.enter-btn {
+  background: #5c7ba8;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.enter-btn:hover {
+  background: #4a6a96;
+}
+
+.instruction-text {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #5c7ba8;
+  animation: fadePulse 2s infinite;
+}
+
+@keyframes fadePulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
