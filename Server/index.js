@@ -11,7 +11,6 @@ const PORT = process.env.PORT || 5000;
 /* ===============================
    FIREBASE ADMIN INITIALIZATION
 ================================ */
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -48,10 +47,8 @@ const db = admin.firestore();
 /* ===============================
    MIDDLEWARE
 ================================ */
-
 app.use(express.json());
 
-// ✅ SIMPLE, STABLE CORS (NO OPTIONS ROUTE)
 app.use(
   cors({
     origin: [
@@ -63,35 +60,70 @@ app.use(
       "https://rsvp-e-invite-738aa.firebaseapp.com",
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type"],
   })
 );
 
 /* ===============================
    TEST ROUTE
 ================================ */
-
 app.get("/api", (_, res) => {
   res.json({ message: "Server running!" });
 });
 
 /* ===============================
-   GUESTLIST ROUTES
+   GET GUEST LIST
 ================================ */
-
 app.get("/api/guestlist", async (_, res) => {
   try {
     const snapshot = await db.collection("GuestList").get();
-    res.json(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const guests = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    res.json(guests);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
 /* ===============================
+   ✅ UPDATE ATTENDANCE (FIX)
+================================ */
+// UPDATE attending status (FULLNAME BASED)
+app.patch("/api/guestlist/attending", async (req, res) => {
+  const { updates } = req.body;
+
+  if (!Array.isArray(updates)) {
+    return res.status(400).json({ error: "Invalid payload" });
+  }
+
+  try {
+    const batch = db.batch();
+
+    for (const { FullName, attending } of updates) {
+      const snapshot = await db
+        .collection("GuestList")
+        .where("FullName", "==", FullName)
+        .get();
+
+      snapshot.forEach(doc => {
+        batch.update(doc.ref, { attending: Boolean(attending) });
+      });
+    }
+
+    await batch.commit();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+/* ===============================
    START SERVER
 ================================ */
-
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

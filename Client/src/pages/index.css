@@ -1,5 +1,5 @@
 /* =========================
-   RESET
+   BASE
 ========================= */
 * {
   box-sizing: border-box;
@@ -7,71 +7,69 @@
 
 html, body {
   margin: 0;
+  padding: 0;
   background: #242424;
   color: white;
   font-family: 'DM Serif Text', serif;
-  overflow-x: hidden;
-}
-
-.app-root {
-  width: 100%;
 }
 
 /* =========================
-   FULLSCREEN LOADER
+   HEART LOADER
 ========================= */
-.fullscreen-loader {
+.heart-loader {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
   z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  pointer-events: none;
 }
 
-.loader-content {
-  text-align: center;
+.heart {
+  position: absolute;
+  top: -10%;
+  color: white;
+  animation: heartFall linear infinite;
 }
 
-.loader-content p {
-  margin-top: 1rem;
-  font-size: 1rem;
-  letter-spacing: 0.1em;
-}
-
-/* Spinner */
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(255,255,255,0.3);
-  border-top: 4px solid white;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes heartFall {
+  from { transform: translateY(0); opacity: 0; }
+  15% { opacity: 1; }
+  to { transform: translateY(120vh); opacity: 0; }
 }
 
 /* =========================
-   PAGE BASE
+   STICKY NAV
+========================= */
+.sticky-nav {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+}
+
+.sticky-nav button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  border: none;
+  background: white;
+  color: black;
+  font-weight: 600;
+}
+
+/* =========================
+   PAGE
 ========================= */
 .page {
-  position: relative;
-  width: 100%;
   min-height: 100svh;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1.25rem;
   background-size: cover;
   background-position: center;
+  position: relative;
   opacity: 0;
   transform: translateY(20px);
-  transition: all 0.6s ease;
+  transition: 0.6s ease;
 }
 
 .page.visible {
@@ -82,48 +80,20 @@ html, body {
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.55);
-}
-
-/* =========================
-   STICKY NAV
-========================= */
-.sticky-nav {
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.sticky-nav button {
-  padding: 0.6rem 1rem;
-  border-radius: 999px;
-  border: none;
-  background: rgba(255,255,255,0.9);
-  color: #000;
-  font-weight: 600;
-  font-size: 0.75rem;
+  background: rgba(0,0,0,.55);
 }
 
 /* =========================
    HERO
 ========================= */
 .hero-text {
+  position: relative;
   z-index: 2;
-  text-align: center;
 }
 
-.hero-names {
+.hero-text h1 {
   font-family: 'Mea Culpa', cursive;
   font-size: clamp(3rem, 8vw, 6rem);
-}
-
-.hero-subtitle {
-  letter-spacing: 0.15em;
-  font-size: 0.9rem;
 }
 
 /* =========================
@@ -133,74 +103,110 @@ html, body {
   z-index: 2;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
-  width: 100%;
-  max-width: 360px;
+  gap: 1.5rem;
+  width: 90%;
+  max-width: 900px;
 }
 
 .venue-wrapper img {
   width: 100%;
-  border-radius: 12px;
-}
-
-/* =========================
-   RSVP MODAL
-========================= */
-.rsvp-modal {
-  width: calc(100vw - 2rem);
-  max-width: 420px;
-  padding: 1.25rem;
   border-radius: 14px;
 }
 
-.rsvp-modal input {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  font-size: 16px;
-  border-radius: 10px;
-  margin-bottom: 0.75rem;
-}
-
-/* =========================
-   DROPDOWN (WHITE)
-========================= */
-.guest-options {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-  overflow: hidden;
-  max-height: 40vh;
-  overflow-y: auto;
-}
-
-.guest-option {
-  padding: 0.85rem 1rem;
-  color: #222;
-  font-size: 0.95rem;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
-}
-
-.guest-option:hover {
-  background: #f2f5ff;
-}
-
-/* =========================
-   TABLET
-========================= */
 @media (min-width: 768px) {
   .venue-wrapper {
     grid-template-columns: repeat(2, 1fr);
-    max-width: 720px;
   }
 }
 
 /* =========================
-   DESKTOP
+   DROPDOWN
 ========================= */
-@media (min-width: 1024px) {
-  .venue-wrapper {
-    max-width: 900px;
-    gap: 2.5rem;
-  }
+.guest-options {
+  background: white;
+  color: black;
+  border-radius: 12px;
+  max-height: 40vh;
+  overflow-y: auto;
+  margin: 0.5rem 0 1rem;
+}
+
+.guest-option {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.guest-option:hover {
+  background: #f2f2f2;
+}
+
+/* =========================
+   ATTENDANCE
+========================= */
+.attendance-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.attend-btn,
+.decline-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.attend-btn {
+  background: #e8fff1;
+  color: #176c42;
+}
+
+.decline-btn {
+  background: #f8f8f8;
+  color: #555;
+}
+
+.attend-btn.active {
+  border-color: #176c42;
+}
+
+.decline-btn.active {
+  border-color: #888;
+}
+
+/* =========================
+   CONTINUE
+========================= */
+.continue-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: none;
+  background: #ccc;
+  color: #666;
+  font-weight: 600;
+}
+
+.continue-btn.enabled {
+  background: #6495ff;
+  color: white;
+}
+
+/* =========================
+   CHECKBOX GROUP
+========================= */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: black;
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
 }

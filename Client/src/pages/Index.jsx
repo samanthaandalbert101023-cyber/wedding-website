@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Countdown from '../components/Countdown';
 import RSVPModal from './RSVPModal';
-import { useGET } from '../hooks/useGET';
 
 import image1 from '../img/1.JPG';
 import image2 from '../img/2.JPG';
@@ -17,69 +16,88 @@ import './Index.css';
 const normalize = (str = '') =>
   str.toLowerCase().replace(/\s+/g, ' ').trim();
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const Index = () => {
-  /* ===============================
-     API
-  ================================ */
   const BASE_URL =
     window.location.hostname === 'localhost'
       ? 'http://localhost:5000'
       : 'https://wedding-website1.onrender.com';
 
-  const [, , fetchGuest] = useGET(`${BASE_URL}/api/guestlist`, false);
-
   /* ===============================
      STATE
-  ================================ */
+  =============================== */
+  const [loadingGuests, setLoadingGuests] = useState(false);
+
   const [openModal, setOpenModal] = useState(false);
+  const [openGroupModal, setOpenGroupModal] = useState(false);
+
   const [allGuests, setAllGuests] = useState([]);
   const [guestName, setGuestName] = useState('');
   const [dropDown, setDropDown] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
-  const [loadingGuests, setLoadingGuests] = useState(false);
 
-  const [openListModal, setOpenListModal] = useState({
-    isActive: false,
-    listNames: [],
-  });
+  const [attendance, setAttendance] = useState(null); // 'yes' | 'no'
+
+  const [groupGuests, setGroupGuests] = useState([]);
+  const [checkedGuests, setCheckedGuests] = useState([]); // ✅ FullName based
 
   /* ===============================
-     OPEN RSVP → FETCH ONCE
-  ================================ */
-  const handleOpenModal = async () => {
-    setOpenModal(true);
+     FETCH GUEST LIST
+  =============================== */
+  const fetchGuestList = async () => {
+    const res = await fetch(`${BASE_URL}/api/guestlist`);
+    if (!res.ok) throw new Error('Failed to fetch guest list');
+    return res.json();
+  };
 
-    if (allGuests.length === 0) {
-      setLoadingGuests(true);
-      try {
-        const resp = await fetchGuest(`${BASE_URL}/api/guestlist`);
-        const cleaned = (resp || []).map(g => ({
-          ...g,
-          _n: normalize(g.FullName),
-        }));
-        setAllGuests(cleaned);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingGuests(false);
-      }
+  /* ===============================
+     OPEN RSVP FLOW
+  =============================== */
+  const handleOpenRSVP = async () => {
+    setLoadingGuests(true);
+
+    setGuestName('');
+    setDropDown([]);
+    setSelectedGuest(null);
+    setAttendance(null);
+    setGroupGuests([]);
+    setCheckedGuests([]);
+
+    try {
+      const resp = await fetchGuestList();
+      await delay(2000);
+
+      const cleaned = resp.map(g => ({
+        ...g,
+        _n: normalize(g.FullName),
+      }));
+
+      setAllGuests(cleaned);
+      setOpenModal(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingGuests(false);
     }
   };
 
   const handleCloseModal = () => {
+    setOpenModal(false);
     setGuestName('');
     setDropDown([]);
     setSelectedGuest(null);
-    setOpenModal(false);
+    setAttendance(null);
   };
 
   /* ===============================
-     LOCAL SEARCH
-  ================================ */
-  const handleOnChange = (e) => {
+     SEARCH
+  =============================== */
+  const handleNameChange = (e) => {
     const value = e.target.value;
     setGuestName(value);
     setSelectedGuest(null);
+    setAttendance(null);
 
     const q = normalize(value);
     if (q.length < 2) {
@@ -87,12 +105,12 @@ const Index = () => {
       return;
     }
 
-    const startsWith = allGuests.filter(g => g._n.startsWith(q));
+    const starts = allGuests.filter(g => g._n.startsWith(q));
     const includes = allGuests.filter(
       g => !g._n.startsWith(q) && g._n.includes(q)
     );
 
-    setDropDown([...startsWith, ...includes].slice(0, 8));
+    setDropDown([...starts, ...includes].slice(0, 10));
   };
 
   const handleSelectGuest = (guest) => {
@@ -102,71 +120,125 @@ const Index = () => {
   };
 
   /* ===============================
-     SUBMIT
-  ================================ */
-  const handleOnSubmit = (e) => {
-    e.preventDefault();
+     CONTINUE
+  =============================== */
+const handleContinue = (e) => {
+  e.preventDefault();
+  if (!selectedGuest || !attendance) return;
 
-    if (!selectedGuest) {
-      alert('Please select your name from the list.');
-      return;
-    }
+  if (attendance === 'no') {
+    alert('Thank you for your response 🤍');
+    handleCloseModal();
+    return;
+  }
 
-    setOpenListModal({
-      isActive: true,
-      listNames: [selectedGuest],
+  const connected = allGuests.filter(
+    g => g.id === selectedGuest.id
+  );
+
+  setGroupGuests(connected);
+
+  // ✅ FIX: respect existing attending field
+  setCheckedGuests(
+    connected
+      .filter(g => g.attending === true)
+      .map(g => g.FullName)
+  );
+
+  setOpenModal(false);
+  setOpenGroupModal(true);
+};
+
+
+  /* ===============================
+     CHECKBOX TOGGLE (FIXED)
+  =============================== */
+const toggleGuest = (fullName) => {
+  setCheckedGuests(prev =>
+    prev.includes(fullName)
+      ? prev.filter(name => name !== fullName)
+      : [...prev, fullName]
+  );
+};
+
+const handleConfirmGroup = async () => {
+  // ✅ Build minimal update payload
+  const finalPayload = groupGuests.map(g => ({
+    ...g,
+    attending: checkedGuests.includes(g.FullName),
+  }));
+  setLoadingGuests(true);
+  try {
+    await fetch(`${BASE_URL}/api/guestlist/attending`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        updates: finalPayload, // ✅ REQUIRED
+      }),
     });
-  };
+
+    console.log('FINAL RSVP PAYLOAD:', finalPayload);
+    alert('RSVP confirmed 💕');
+    setOpenGroupModal(false);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to save RSVP');
+  }
+  setLoadingGuests(false);
+};
+
+  const canContinue = Boolean(selectedGuest && attendance);
 
   /* ===============================
      SCROLL EFFECT
-  ================================ */
+  =============================== */
   useEffect(() => {
     const sections = document.querySelectorAll('.page');
-
     const observer = new IntersectionObserver(
       entries =>
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
+          if (entry.isIntersecting) entry.target.classList.add('visible');
         }),
       { threshold: 0.3 }
     );
-
     sections.forEach(sec => observer.observe(sec));
     return () => observer.disconnect();
   }, []);
 
-  /* ===============================
-     RENDER
-  ================================ */
   return (
     <div className="app-root">
 
-      {/* 🔵 FULLSCREEN LOADER */}
+      {/* 🤍 HEART LOADER */}
       {loadingGuests && (
-        <div className="fullscreen-loader">
-          <div className="loader-content">
-            <span className="spinner" />
-            <p>Loading guest list…</p>
-          </div>
+        <div className="heart-loader">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <span
+              key={i}
+              className="heart"
+              style={{
+                left: `${Math.random() * 100}%`,
+                fontSize: `${1.5 + Math.random() * 2.5}rem`,
+                animationDuration: `${3 + Math.random() * 3}s`,
+              }}
+            >
+              ❤
+            </span>
+          ))}
         </div>
       )}
 
-      {/* STICKY NAV */}
+      {/* NAV */}
       <div className="sticky-nav">
-        <button>Venues</button>
-        <button>Gallery</button>
-        <button onClick={handleOpenModal}>RSVP</button>
+        <button onClick={handleOpenRSVP}>RSVP</button>
       </div>
 
       {/* HERO */}
       <div className="page hero" style={{ backgroundImage: `url(${image1})` }}>
         <div className="overlay" />
         <div className="hero-text">
-          <h1 className="hero-names">Samantha & Albert</h1>
-          <p className="hero-subtitle">ARE GETTING MARRIED</p>
+          <h1>Samantha & Albert</h1>
         </div>
       </div>
 
@@ -189,22 +261,18 @@ const Index = () => {
         title="Samantha & Albert"
         onClose={handleCloseModal}
         Children={
-          <form onSubmit={handleOnSubmit} autoComplete="off">
-            <p className="rsvp-text">
-              If you're responding for you or your family, you’ll be able to RSVP for everyone.
-            </p>
-
+          <form onSubmit={handleContinue}>
             <input
               placeholder="Full Name"
               value={guestName}
-              onChange={handleOnChange}
+              onChange={handleNameChange}
             />
 
             {dropDown.length > 0 && (
               <div className="guest-options">
                 {dropDown.map(g => (
                   <div
-                    key={g.id}
+                    key={`${g.id}-${g.FullName}`}
                     className="guest-option"
                     onClick={() => handleSelectGuest(g)}
                   >
@@ -214,17 +282,66 @@ const Index = () => {
               </div>
             )}
 
-            <button type="submit">FIND YOUR INVITATION</button>
+            {selectedGuest && (
+              <div className="attendance-buttons">
+                <button
+                  type="button"
+                  className={`attend-btn ${attendance === 'yes' ? 'active' : ''}`}
+                  onClick={() => setAttendance('yes')}
+                >
+                  💖 Will Attend
+                </button>
+
+                <button
+                  type="button"
+                  className={`decline-btn ${attendance === 'no' ? 'active' : ''}`}
+                  onClick={() => setAttendance('no')}
+                >
+                  🤍 Will Not Attend
+                </button>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className={`continue-btn ${canContinue ? 'enabled' : ''}`}
+              disabled={!canContinue}
+            >
+              CONTINUE
+            </button>
           </form>
         }
       />
 
-      {/* CONFIRM MODAL */}
+      {/* GROUP MODAL */}
       <RSVPModal
-        isOpen={openListModal.isActive}
-        title="Samantha & Albert"
-        onClose={() => setOpenListModal({ isActive: false, listNames: [] })}
-        Children={<p>Guest found. Continue RSVP.</p>}
+        isOpen={openGroupModal}
+        title="Who will attend?"
+        onClose={() => setOpenGroupModal(false)}
+        Children={
+          <>
+            {groupGuests.map(g => (
+              <label
+                key={`${g.id}-${g.FullName}`}
+                className="checkbox-row"
+              >
+                <input
+                  type="checkbox"
+                  checked={checkedGuests.includes(g.FullName)}
+                  onChange={() => toggleGuest(g.FullName)}
+                />
+                <span>{g.FullName}</span>
+              </label>
+            ))}
+
+            <button
+              className="continue-btn enabled"
+              onClick={handleConfirmGroup}
+            >
+              CONFIRM RSVP
+            </button>
+          </>
+        }
       />
     </div>
   );
