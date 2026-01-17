@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Countdown from '../components/Countdown';
 import RSVPModal from './RSVPModal';
 import Modal from '../components/Modal';
@@ -6,79 +6,56 @@ import Modal from '../components/Modal';
 import image1 from '../img/1.JPG';
 import image2 from '../img/2.JPG';
 import cover3 from '../img/3.JPG';
-import Ceremony from '../img/ceremony.png';
-import Reception from '../img/reception.png';
+import churchQR from '../img/church_qr.png';
+import venueQR from '../img/venue_qr.png';
 
 import './Index.css';
 
-/* ===============================
-   HELPERS
-================================ */
-const normalize = (str = '') =>
-  str.toLowerCase().replace(/\s+/g, ' ').trim();
-
+const normalize = (str = '') => str.toLowerCase().replace(/\s+/g, ' ').trim();
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const Index = () => {
-  const BASE_URL =
-    window.location.hostname === 'localhost'
-      ? 'http://localhost:5000'
-      : 'https://wedding-website1.onrender.com';
+  // Refs for navigation
+  const pageRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  /* ===============================
-     STATE
-  =============================== */
+  const BASE_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'https://wedding-website1.onrender.com';
+
   const [loadingGuests, setLoadingGuests] = useState(false);
-
-  const [successModal, setSuccessModal] = useState({
-    isActive: false,
-    message: '',
-  });
-
+  const [successModal, setSuccessModal] = useState({ isActive: false, message: '' });
   const [openModal, setOpenModal] = useState(false);
   const [openGroupModal, setOpenGroupModal] = useState(false);
-
   const [allGuests, setAllGuests] = useState([]);
   const [guestName, setGuestName] = useState('');
   const [dropDown, setDropDown] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
-
-  const [attendance, setAttendance] = useState(null); // 'yes' | 'no'
-
   const [groupGuests, setGroupGuests] = useState([]);
-  const [checkedGuests, setCheckedGuests] = useState([]); // FullName based
+  const [checkedGuests, setCheckedGuests] = useState([]);
 
-  /* ===============================
-     FETCH GUEST LIST
-  =============================== */
+  // Helper to scroll to specific page
+  const scrollToSection = (index) => {
+    pageRefs[index].current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const fetchGuestList = async () => {
     const res = await fetch(`${BASE_URL}/api/guestlist`);
     if (!res.ok) throw new Error('Failed to fetch guest list');
     return res.json();
   };
 
-  /* ===============================
-     OPEN RSVP
-  =============================== */
   const handleOpenRSVP = async () => {
     setLoadingGuests(true);
-
     setGuestName('');
     setDropDown([]);
     setSelectedGuest(null);
-    setAttendance(null);
     setGroupGuests([]);
     setCheckedGuests([]);
 
     try {
       const resp = await fetchGuestList();
-      await delay(2000);
-
-      const cleaned = resp.map(g => ({
-        ...g,
-        _n: normalize(g.FullName),
-      }));
-
+      await delay(1200);
+      const cleaned = resp.map(g => ({ ...g, _n: normalize(g.FullName) }));
       setAllGuests(cleaned);
       setOpenModal(true);
     } catch (err) {
@@ -94,14 +71,10 @@ const Index = () => {
     setSuccessModal({ isActive: false, message: '' });
   };
 
-  /* ===============================
-     SEARCH
-  =============================== */
   const handleNameChange = (e) => {
     const value = e.target.value;
     setGuestName(value);
     setSelectedGuest(null);
-    setAttendance(null);
 
     const q = normalize(value);
     if (q.length < 2) {
@@ -110,10 +83,7 @@ const Index = () => {
     }
 
     const starts = allGuests.filter(g => g._n.startsWith(q));
-    const includes = allGuests.filter(
-      g => !g._n.startsWith(q) && g._n.includes(q)
-    );
-
+    const includes = allGuests.filter(g => !g._n.startsWith(q) && g._n.includes(q));
     setDropDown([...starts, ...includes].slice(0, 10));
   };
 
@@ -123,122 +93,55 @@ const Index = () => {
     setDropDown([]);
   };
 
-  /* ===============================
-     CONTINUE
-  =============================== */
-  const handleContinue = async (e) => {
+  const handleContinue = (e) => {
     e.preventDefault();
-    if (!selectedGuest || !attendance) return;
+    if (!selectedGuest) return;
 
-    // ❌ NOT ATTENDING
-    if (attendance === 'no') {
-      try {
-        const connected = allGuests.filter(
-          g => g.id === selectedGuest.id
-        );
-
-        const payload = connected.map(g => ({
-          ...g,
-          attending: false,
-        }));
-
-        setLoadingGuests(true);
-
-        await fetch(`${BASE_URL}/api/guestlist/attending`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ updates: payload }),
-        });
-
-        setSuccessModal({
-          isActive: true,
-          message:
-            'Thank you for letting us know 🤍\n\nWhile we’ll miss celebrating with you, we truly appreciate your response.',
-        });
-
-        setOpenModal(false);
-      } catch (err) {
-        setSuccessModal({
-          isActive: true,
-          message: 'Something went wrong. Please try again.',
-        });
-      } finally {
-        setLoadingGuests(false);
-      }
-      return;
-    }
-
-    // ✅ ATTENDING
-    const connected = allGuests.filter(
-      g => g.id === selectedGuest.id
-    );
-
+    const connected = allGuests.filter(g => g.id === selectedGuest.id);
     setGroupGuests(connected);
-
-    setCheckedGuests(
-      connected
-        .filter(g => g.attending === true)
-        .map(g => g.FullName)
-    );
-
+    setCheckedGuests(connected.filter(g => g.attending === true).map(g => g.FullName));
     setOpenModal(false);
     setOpenGroupModal(true);
   };
 
-  /* ===============================
-     CHECKBOX
-  =============================== */
   const toggleGuest = (fullName) => {
     setCheckedGuests(prev =>
-      prev.includes(fullName)
-        ? prev.filter(name => name !== fullName)
-        : [...prev, fullName]
+      prev.includes(fullName) ? prev.filter(n => n !== fullName) : [...prev, fullName]
     );
   };
 
-  const handleConfirmGroup = async () => {
-    const finalPayload = groupGuests.map(g => ({
-      ...g,
-      attending: checkedGuests.includes(g.FullName),
-    }));
-
+  const submitAttendance = async (isAttending) => {
     setLoadingGuests(true);
+    const payload = groupGuests.map(g => ({
+      ...g,
+      attending: isAttending ? checkedGuests.includes(g.FullName) : false,
+    }));
 
     try {
       await fetch(`${BASE_URL}/api/guestlist/attending`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates: finalPayload }),
+        body: JSON.stringify({ updates: payload }),
       });
-
+      await delay(800);
       setSuccessModal({
         isActive: true,
-        message:
-          'Thank you for your response! 💕\n\nYour RSVP has been successfully recorded.',
+        message: isAttending 
+          ? 'Thank you for your response! 💕\n\nYour attendance has been successfully recorded.'
+          : 'Thank you for letting us know 🤍\n\nWhile we’ll miss celebrating with you, we truly appreciate your response.',
       });
-
       setOpenGroupModal(false);
-    } catch (err) {
-      setSuccessModal({
-        isActive: true,
-        message:
-          'Oops! Something went wrong 🤍\n\nPlease try again in a moment.',
-      });
+    } catch {
+      setSuccessModal({ isActive: true, message: 'Something went wrong 🤍\n\nPlease try again.' });
     } finally {
       setLoadingGuests(false);
     }
   };
 
-  /* ===============================
-     SCROLL EFFECT
-  =============================== */
   useEffect(() => {
     const sections = document.querySelectorAll('.page');
     const observer = new IntersectionObserver(
-      entries =>
-        entries.forEach(e =>
-          e.isIntersecting && e.target.classList.add('visible')
-        ),
+      entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
       { threshold: 0.3 }
     );
     sections.forEach(s => observer.observe(s));
@@ -247,11 +150,9 @@ const Index = () => {
 
   return (
     <div className="app-root">
-
-      {/* ❤️ HEART LOADER (ALWAYS ON TOP) */}
       {loadingGuests && (
         <div className="heart-loader">
-          {Array.from({ length: 50 }).map((_, i) => (
+          {Array.from({ length: 40 }).map((_, i) => (
             <span
               key={i}
               className="heart"
@@ -259,6 +160,7 @@ const Index = () => {
                 left: `${Math.random() * 100}%`,
                 fontSize: `${1.5 + Math.random() * 2.5}rem`,
                 animationDuration: `${3 + Math.random() * 3}s`,
+                animationDelay: `${Math.random() * 0.5}s`,
               }}
             >
               ❤
@@ -267,33 +169,202 @@ const Index = () => {
         </div>
       )}
 
-      {/* NAV */}
+      {/* STICKY NAV WITH PAGE LOCATORS */}
       <div className="sticky-nav">
-        <button onClick={handleOpenRSVP}>RSVP</button>
-      </div>
-
-      {/* HERO */}
-      <div className="page hero" style={{ backgroundImage: `url(${image1})` }}>
-        <div className="overlay" />
-        <div className="hero-text">
-          <h1>Samantha & Albert</h1>
+        <div className="nav-controls">
+           <button onClick={() => scrollToSection(0)}>Home</button>
+           <button onClick={() => scrollToSection(1)}>Dates</button>
+           <button onClick={() => scrollToSection(2)}>Program</button>
+           <button onClick={() => scrollToSection(3)}>Attire</button>
+           <button onClick={() => scrollToSection(4)}>Location</button>
+           <button className="nav-rsvp-btn" onClick={handleOpenRSVP}>RSVP</button>
         </div>
       </div>
 
-      {/* COUNTDOWN */}
-      <div className="page countdown slim" style={{ backgroundImage: `url(${image2})` }}>
+      {/* --- PAGE 1: HERO --- */}
+      <div ref={pageRefs[0]} className="page hero" style={{ backgroundImage: `url(${image1})` }}>
+        <div className="overlay" />
+        <div className="hero-text">
+          <h1>Albert & Samantha</h1>
+        </div>
+      </div>
+
+      {/* --- PAGE 2: COUNTDOWN --- */}
+      <div ref={pageRefs[1]} className="page countdown slim" style={{ backgroundImage: `url(${image2})` }}>
         <Countdown />
       </div>
 
-      {/* VENUES */}
-      <div className="page venues slim" style={{ backgroundImage: `url(${cover3})` }}>
-        <div className="venue-wrapper">
-          <img src={Ceremony} alt="Ceremony" />
-          <img src={Reception} alt="Reception" />
+      {/* --- PAGE 3: ROADMAP --- */}
+      <div ref={pageRefs[2]} className="page venues slim" style={{ backgroundImage: `url(${cover3})` }}>
+        <div className="overlay" />
+        <div className="venues-roadmap-elegant">
+          <h2 className="venues-title">The Wedding Program</h2>
+          <div className="tree-v-container">
+            <div className="tree-v-trunk"></div>
+
+            {/* EVENT 1 */}
+            <div className="tree-v-item branch-right ev-1">
+              <div className="tree-v-node">💍</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">01:45 PM</span>
+                <h3>Wedding Ceremony</h3>
+              </div>
+            </div>
+
+            {/* EVENT 2 */}
+            <div className="tree-v-item branch-left ev-2">
+              <div className="tree-v-node">📸</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">04:00 PM</span>
+                <h3>Pre-Event</h3>
+                <p>Grazing Table & Socials</p>
+              </div>
+            </div>
+
+            {/* EVENT 3 */}
+            <div className="tree-v-item branch-right ev-3">
+              <div className="tree-v-node">🥂</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">04:45 PM</span>
+                <h3>Welcome Toast</h3>
+              </div>
+            </div>
+
+            {/* EVENT 4 */}
+            <div className="tree-v-item branch-left ev-4">
+              <div className="tree-v-node">🍽️</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">05:15 PM</span>
+                <h3>Wedding Dinner</h3>
+              </div>
+            </div>
+
+            {/* EVENT 5 */}
+            <div className="tree-v-item branch-right ev-5">
+              <div className="tree-v-node">🍸</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">05:20 PM</span>
+                <h3>Cocktail Hour</h3>
+              </div>
+            </div>
+
+            {/* EVENT 6 */}
+            <div className="tree-v-item branch-left ev-6">
+              <div className="tree-v-node">💃</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">05:45 PM</span>
+                <h3>Celebration Dance</h3>
+              </div>
+            </div>
+
+            {/* EVENT 7 */}
+            <div className="tree-v-item branch-right ev-7">
+              <div className="tree-v-node">🎞️</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">06:15 PM</span>
+                <h3>Same Day Edit</h3>
+              </div>
+            </div>
+
+            {/* EVENT 8 */}
+            <div className="tree-v-item branch-left ev-8">
+              <div className="tree-v-node">✨</div>
+              <div className="tree-v-content">
+                <span className="tree-v-time">07:00 PM</span>
+                <h3>Grand Send-Off</h3>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* RSVP MODALS */}
+      {/* --- PAGE 4: ATTIRE --- */}
+      <div ref={pageRefs[3]} className="page attire-section">
+        <div className="attire-container">
+          <div className="attire-header">
+            <h2 className="attire-title">What to wear?</h2>
+            <div className="title-divider"></div>
+          </div>
+
+          <div className="attire-grid">
+            <div className="sponsor-attire">
+              <div className="attire-card-mini">
+                <h4>Principal Sponsors</h4>
+                <p className="color-label navy">Navy Blue Formal Attire</p>
+              </div>
+              <div className="attire-card-mini">
+                <h4>Secondary Sponsors</h4>
+                <p className="color-label dusty">Dusty Blue Formal Attire</p>
+              </div>
+            </div>
+
+            <div className="guest-attire-main">
+              <h3 className="dress-code">For Guests</h3>
+              <p className="semi-formal">Semi-Formal attire in the following hues:</p>
+              <p className="hue-list">Champagne, Beige, Soft Grey, Blue Gray & Dusty Blue</p>
+              
+              <div className="color-palette-large">
+                <div className="swatch" style={{ backgroundColor: '#E3D2B4' }}></div>
+                <div className="swatch" style={{ backgroundColor: '#C5B49E' }}></div>
+                <div className="swatch" style={{ backgroundColor: '#A3A3A3' }}></div>
+                <div className="swatch" style={{ backgroundColor: '#8E9CAF' }}></div>
+                <div className="swatch" style={{ backgroundColor: '#718EA4' }}></div>
+              </div>
+
+              <div className="guest-guide">
+                <div className="guide-item">
+                  <strong>Gentlemen</strong>
+                  <p>Long Sleeves Polo and Slacks</p>
+                </div>
+                <div className="guide-item">
+                  <strong>Ladies</strong>
+                  <p>Sunday Dress, Cocktail or Long Dress</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- PAGE 5: LOCATIONS --- */}
+      <div ref={pageRefs[4]} className="page location-section">
+        <div className="location-container">
+          <div className="location-header">
+            <h2 className="location-title">Locations</h2>
+            <p className="location-subtitle">Scan QR codes for Google Maps directions</p>
+            <div className="title-divider"></div>
+          </div>
+
+          <div className="location-grid">
+            <div className="location-card">
+              <div className="qr-frame">
+                <img src={churchQR} alt="Church Location QR" className="qr-image" />
+              </div>
+              <div className="location-details">
+                <h3>CEREMONY</h3>
+                <div className="location-underline"></div>
+                <a href="PASTE_CHURCH_MAPS_LINK_HERE" target="_blank" rel="noreferrer" className="maps-btn">
+                  Open in Maps
+                </a>
+              </div>
+            </div>
+
+            <div className="location-card">
+              <div className="qr-frame">
+                <img src={venueQR} alt="Venue Location QR" className="qr-image" />
+              </div>
+              <div className="location-details">
+                <h3>RECEPTION</h3>
+                <div className="location-underline"></div>
+                <a href="PASTE_VENUE_MAPS_LINK_HERE" target="_blank" rel="noreferrer" className="maps-btn">
+                  Open in Maps
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <RSVPModal
         isOpen={openModal}
         title="Samantha & Albert"
@@ -301,13 +372,13 @@ const Index = () => {
         Children={
           <form onSubmit={handleContinue}>
             <input
+              className='uppercase'
               placeholder="Full Name"
               value={guestName}
               onChange={handleNameChange}
             />
-
             {dropDown.length > 0 && (
-              <div className="guest-options">
+              <div className="guest-options uppercase">
                 {dropDown.map(g => (
                   <div
                     key={`${g.id}-${g.FullName}`}
@@ -319,31 +390,10 @@ const Index = () => {
                 ))}
               </div>
             )}
-
-            {selectedGuest && (
-              <div className="attendance-buttons">
-                <button
-                  type="button"
-                  className={`attend-btn ${attendance === 'yes' ? 'active' : ''}`}
-                  onClick={() => setAttendance('yes')}
-                >
-                  💖 Will Attend
-                </button>
-
-                <button
-                  type="button"
-                  className={`decline-btn ${attendance === 'no' ? 'active' : ''}`}
-                  onClick={() => setAttendance('no')}
-                >
-                  🤍 Will Not Attend
-                </button>
-              </div>
-            )}
-
             <button
               type="submit"
-              className={`continue-btn ${attendance ? 'enabled' : ''}`}
-              disabled={!attendance}
+              className={`continue-btn ${selectedGuest ? 'enabled' : ''}`}
+              disabled={!selectedGuest}
             >
               CONTINUE
             </button>
@@ -351,10 +401,9 @@ const Index = () => {
         }
       />
 
-      {/* GROUP MODAL */}
       <RSVPModal
         isOpen={openGroupModal}
-        title="Who will attend?"
+        title="Your Attendance"
         onClose={handleCloseAll}
         Children={
           <>
@@ -365,21 +414,19 @@ const Index = () => {
                   checked={checkedGuests.includes(g.FullName)}
                   onChange={() => toggleGuest(g.FullName)}
                 />
-                <span>{g.FullName}</span>
+                <span className='uppercase'>{g.FullName}</span>
               </label>
             ))}
-
-            <button
-              className="continue-btn enabled"
-              onClick={handleConfirmGroup}
-            >
-              CONFIRM RSVP
+            <button className="continue-btn enabled" onClick={() => submitAttendance(true)}>
+              💖 I WILL ATTEND
+            </button>
+            <button className="continue-btn" onClick={() => submitAttendance(false)}>
+              🤍 I WILL NOT ATTEND
             </button>
           </>
         }
       />
 
-      {/* SUCCESS / ERROR MODAL */}
       <Modal
         isOpen={successModal.isActive}
         onClose={handleCloseAll}

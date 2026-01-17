@@ -120,7 +120,7 @@
 
 /* INFO (default) */
 .modal-container.info {
-  border-top: 6px solid #6495ff;
+  /* border-top: 6px solid #000000; */
 }
 
 /* SUCCESS */

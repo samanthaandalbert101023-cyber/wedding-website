@@ -1,123 +1,165 @@
-/* Modal overlay */
+/* =========================
+   OVERLAY
+========================= */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-/* Modal container (wider) */
-.modal {
-  background: #5a86add0;
-  padding: 2rem;          /* padding around content wrapper */
-  border-radius: 10px;
-  width: 90%;
-  max-width: 600px;       /* wider modal box */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  color: white;
+/* =========================
+   MODAL CONTAINER
+========================= */
+.modal.wedding-modal {
+  position: relative;
+  background: linear-gradient(180deg, #fdfefe, #f2f6fb);
+  width: 92%;
+  max-width: 620px;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  animation: modalFadeIn 0.35s ease;
 }
 
-/* Inner content wrapper */
+/* =========================
+   FLORAL DECOR (PURE CSS)
+========================= */
+.floral {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle at center,
+    rgba(180, 200, 230, 0.6),
+    rgba(180, 200, 230, 0.2),
+    transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.floral-top-left {
+  top: -40px;
+  left: -40px;
+}
+
+.floral-top-right {
+  top: -40px;
+  right: -40px;
+}
+
+.floral-bottom-left {
+  bottom: -40px;
+  left: -40px;
+}
+
+.floral-bottom-right {
+  bottom: -40px;
+  right: -40px;
+}
+
+/* =========================
+   CONTENT
+========================= */
 .modal-content {
-  max-width: 500px;       /* text/content width */
-  margin: 0 auto;         /* center content */
-  padding: 0 1.5rem;      /* horizontal padding for text */
+  position: relative;
+  z-index: 2;
+  text-align: center;
 }
 
-/* Titles without spacing between them */
+/* =========================
+   TITLE
+========================= */
 .modal-title-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1; /* remove extra line spacing */
+  margin-bottom: 1.5rem;
 }
 
 .modal-title-container h2 {
   font-family: 'Mea Culpa', cursive;
-  font-weight: 600;
-  font-size: 5rem;
-  color: #ffffff;
+  font-size: 4.5rem;
   margin: 0;
-  padding: 0;
-  line-height: 1; /* remove spacing */
+  color: #082a4e;
 }
 
 .modal-title-container h3 {
-  font-family: 'DM serif text', serif; /* fixed typo */
-  font-size: 2.2rem;
-  color: #ffffff;
-  margin: 0;
-  padding: 0;
-  line-height: 1; /* remove spacing */
+  font-family: 'DM Serif Text', serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.15em;
+  color: #7a8fa8;
+  margin-top: -0.25rem;
 }
 
-.modal-title-container h2 {
-  font-size: 5rem;  /* larger h2 */
+/* =========================
+   BODY
+========================= */
+.modal-body {
+  margin-top: 1rem;
 }
 
-.modal-title-container h3 {
-  font-size: 2.2rem;    /* smaller h3 */
-}
-
-/* Input fields */
-.modal input,
-.modal select {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  color: black;
-  background-color: white;
+/* Inputs inside modal */
+.modal-body input,
+.modal-body select {
   width: 100%;
-  box-sizing: border-box;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #cfd8e3;
+  background: white;
+  font-size: 1rem;
   margin-bottom: 0.75rem;
 }
 
-/* Submit button */
-.modal button[type="submit"] {
-  padding: 0.75rem 1rem;
-  background-color: #f1f1f1;
-  color: hsla(221, 79%, 41%, 0.957);
-  font-weight: bold;
-  border-radius: 8px;
-  border: none;
+/* =========================
+   BUTTONS
+========================= */
+.modal-body button,
+.close-button {
+  font-family: inherit;
+}
+
+/* Close button */
+.close-button {
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid #cfd8e3;
+  background: white;
+  color: #5b7fa6;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.modal button[type="submit"]:hover {
-  background-color: #ffffff;
+.close-button:hover {
+  background: #eef3f9;
 }
 
-/* Close button always visible */
-.modal .close-button {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: white;
-  color: #1a1a1a;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
+/* =========================
+   ANIMATION
+========================= */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.modal .close-button:hover {
-  background-color: #f0f0f0;
-}
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 480px) {
+  .modal-title-container h2 {
+    font-size: 3.5rem;
+  }
 
-/* Success and error messages */
-.text-green-600 {
-  text-align: center;
-  font-weight: bold;
-  margin-top: 1rem;
-}
-
-.text-red-600 {
-  text-align: center;
-  margin-top: 0.5rem;
+  .modal-title-container h3 {
+    font-size: 1.1rem;
+  }
 }
