@@ -1,23 +1,34 @@
 import React from "react";
+import "./Modal.css";
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  variant = "info", // ✅ NEW: info | success | error
+}) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 relative">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
-          >
+    <div className="modal-overlay">
+      <div className={`modal-container ${variant}`}>
+        {/* HEADER */}
+        <div className="modal-header">
+          <h3 className="modal-title">{title}</h3>
+          <button className="modal-close" onClick={onClose}>
             ✕
           </button>
         </div>
-        <div className="mb-4">{children}</div>
-        <div className="flex justify-end">
-          <button onClick={onClose} className="btn btn-outline btn-sm">
+
+        {/* BODY */}
+        <div className="modal-body">
+          {children}
+        </div>
+
+        {/* FOOTER */}
+        <div className="modal-footer">
+          <button className="modal-btn-outline" onClick={onClose}>
             Close
           </button>
         </div>
@@ -27,4 +38,3 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 export default Modal;
-

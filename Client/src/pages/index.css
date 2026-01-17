@@ -14,18 +14,26 @@ html, body {
 }
 
 /* =========================
-   HEART LOADER
+   HEART LOADER (ON TOP)
 ========================= */
 .heart-loader {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 20000;
   pointer-events: none;
+}
+
+.heart-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .heart {
   position: absolute;
   top: -10%;
+  z-index: 20001;
   color: white;
   animation: heartFall linear infinite;
 }

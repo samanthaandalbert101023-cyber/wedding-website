@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Countdown from '../components/Countdown';
 import RSVPModal from './RSVPModal';
+import Modal from '../components/Modal';
 
 import image1 from '../img/1.JPG';
 import image2 from '../img/2.JPG';
@@ -29,6 +30,11 @@ const Index = () => {
   =============================== */
   const [loadingGuests, setLoadingGuests] = useState(false);
 
+  const [successModal, setSuccessModal] = useState({
+    isActive: false,
+    message: '',
+  });
+
   const [openModal, setOpenModal] = useState(false);
   const [openGroupModal, setOpenGroupModal] = useState(false);
 
@@ -40,7 +46,7 @@ const Index = () => {
   const [attendance, setAttendance] = useState(null); // 'yes' | 'no'
 
   const [groupGuests, setGroupGuests] = useState([]);
-  const [checkedGuests, setCheckedGuests] = useState([]); // ✅ FullName based
+  const [checkedGuests, setCheckedGuests] = useState([]); // FullName based
 
   /* ===============================
      FETCH GUEST LIST
@@ -52,7 +58,7 @@ const Index = () => {
   };
 
   /* ===============================
-     OPEN RSVP FLOW
+     OPEN RSVP
   =============================== */
   const handleOpenRSVP = async () => {
     setLoadingGuests(true);
@@ -82,12 +88,10 @@ const Index = () => {
     }
   };
 
-  const handleCloseModal = () => {
+  const handleCloseAll = () => {
     setOpenModal(false);
-    setGuestName('');
-    setDropDown([]);
-    setSelectedGuest(null);
-    setAttendance(null);
+    setOpenGroupModal(false);
+    setSuccessModal({ isActive: false, message: '' });
   };
 
   /* ===============================
@@ -122,74 +126,108 @@ const Index = () => {
   /* ===============================
      CONTINUE
   =============================== */
-const handleContinue = (e) => {
-  e.preventDefault();
-  if (!selectedGuest || !attendance) return;
+  const handleContinue = async (e) => {
+    e.preventDefault();
+    if (!selectedGuest || !attendance) return;
 
-  if (attendance === 'no') {
-    alert('Thank you for your response 🤍');
-    handleCloseModal();
-    return;
-  }
+    // ❌ NOT ATTENDING
+    if (attendance === 'no') {
+      try {
+        const connected = allGuests.filter(
+          g => g.id === selectedGuest.id
+        );
 
-  const connected = allGuests.filter(
-    g => g.id === selectedGuest.id
-  );
+        const payload = connected.map(g => ({
+          ...g,
+          attending: false,
+        }));
 
-  setGroupGuests(connected);
+        setLoadingGuests(true);
 
-  // ✅ FIX: respect existing attending field
-  setCheckedGuests(
-    connected
-      .filter(g => g.attending === true)
-      .map(g => g.FullName)
-  );
+        await fetch(`${BASE_URL}/api/guestlist/attending`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ updates: payload }),
+        });
 
-  setOpenModal(false);
-  setOpenGroupModal(true);
-};
+        setSuccessModal({
+          isActive: true,
+          message:
+            'Thank you for letting us know 🤍\n\nWhile we’ll miss celebrating with you, we truly appreciate your response.',
+        });
 
+        setOpenModal(false);
+      } catch (err) {
+        setSuccessModal({
+          isActive: true,
+          message: 'Something went wrong. Please try again.',
+        });
+      } finally {
+        setLoadingGuests(false);
+      }
+      return;
+    }
+
+    // ✅ ATTENDING
+    const connected = allGuests.filter(
+      g => g.id === selectedGuest.id
+    );
+
+    setGroupGuests(connected);
+
+    setCheckedGuests(
+      connected
+        .filter(g => g.attending === true)
+        .map(g => g.FullName)
+    );
+
+    setOpenModal(false);
+    setOpenGroupModal(true);
+  };
 
   /* ===============================
-     CHECKBOX TOGGLE (FIXED)
+     CHECKBOX
   =============================== */
-const toggleGuest = (fullName) => {
-  setCheckedGuests(prev =>
-    prev.includes(fullName)
-      ? prev.filter(name => name !== fullName)
-      : [...prev, fullName]
-  );
-};
+  const toggleGuest = (fullName) => {
+    setCheckedGuests(prev =>
+      prev.includes(fullName)
+        ? prev.filter(name => name !== fullName)
+        : [...prev, fullName]
+    );
+  };
 
-const handleConfirmGroup = async () => {
-  // ✅ Build minimal update payload
-  const finalPayload = groupGuests.map(g => ({
-    ...g,
-    attending: checkedGuests.includes(g.FullName),
-  }));
-  setLoadingGuests(true);
-  try {
-    await fetch(`${BASE_URL}/api/guestlist/attending`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        updates: finalPayload, // ✅ REQUIRED
-      }),
-    });
+  const handleConfirmGroup = async () => {
+    const finalPayload = groupGuests.map(g => ({
+      ...g,
+      attending: checkedGuests.includes(g.FullName),
+    }));
 
-    console.log('FINAL RSVP PAYLOAD:', finalPayload);
-    alert('RSVP confirmed 💕');
-    setOpenGroupModal(false);
-  } catch (err) {
-    console.error(err);
-    alert('Failed to save RSVP');
-  }
-  setLoadingGuests(false);
-};
+    setLoadingGuests(true);
 
-  const canContinue = Boolean(selectedGuest && attendance);
+    try {
+      await fetch(`${BASE_URL}/api/guestlist/attending`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updates: finalPayload }),
+      });
+
+      setSuccessModal({
+        isActive: true,
+        message:
+          'Thank you for your response! 💕\n\nYour RSVP has been successfully recorded.',
+      });
+
+      setOpenGroupModal(false);
+    } catch (err) {
+      setSuccessModal({
+        isActive: true,
+        message:
+          'Oops! Something went wrong 🤍\n\nPlease try again in a moment.',
+      });
+    } finally {
+      setLoadingGuests(false);
+    }
+  };
 
   /* ===============================
      SCROLL EFFECT
@@ -198,19 +236,19 @@ const handleConfirmGroup = async () => {
     const sections = document.querySelectorAll('.page');
     const observer = new IntersectionObserver(
       entries =>
-        entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        }),
+        entries.forEach(e =>
+          e.isIntersecting && e.target.classList.add('visible')
+        ),
       { threshold: 0.3 }
     );
-    sections.forEach(sec => observer.observe(sec));
+    sections.forEach(s => observer.observe(s));
     return () => observer.disconnect();
   }, []);
 
   return (
     <div className="app-root">
 
-      {/* 🤍 HEART LOADER */}
+      {/* ❤️ HEART LOADER (ALWAYS ON TOP) */}
       {loadingGuests && (
         <div className="heart-loader">
           {Array.from({ length: 50 }).map((_, i) => (
@@ -255,11 +293,11 @@ const handleConfirmGroup = async () => {
         </div>
       </div>
 
-      {/* RSVP MODAL */}
+      {/* RSVP MODALS */}
       <RSVPModal
         isOpen={openModal}
         title="Samantha & Albert"
-        onClose={handleCloseModal}
+        onClose={handleCloseAll}
         Children={
           <form onSubmit={handleContinue}>
             <input
@@ -304,8 +342,8 @@ const handleConfirmGroup = async () => {
 
             <button
               type="submit"
-              className={`continue-btn ${canContinue ? 'enabled' : ''}`}
-              disabled={!canContinue}
+              className={`continue-btn ${attendance ? 'enabled' : ''}`}
+              disabled={!attendance}
             >
               CONTINUE
             </button>
@@ -317,14 +355,11 @@ const handleConfirmGroup = async () => {
       <RSVPModal
         isOpen={openGroupModal}
         title="Who will attend?"
-        onClose={() => setOpenGroupModal(false)}
+        onClose={handleCloseAll}
         Children={
           <>
             {groupGuests.map(g => (
-              <label
-                key={`${g.id}-${g.FullName}`}
-                className="checkbox-row"
-              >
+              <label key={`${g.id}-${g.FullName}`} className="checkbox-row">
                 <input
                   type="checkbox"
                   checked={checkedGuests.includes(g.FullName)}
@@ -343,6 +378,15 @@ const handleConfirmGroup = async () => {
           </>
         }
       />
+
+      {/* SUCCESS / ERROR MODAL */}
+      <Modal
+        isOpen={successModal.isActive}
+        onClose={handleCloseAll}
+        title="RSVP Update"
+      >
+        <p style={{ whiteSpace: 'pre-line' }}>{successModal.message}</p>
+      </Modal>
     </div>
   );
 };
