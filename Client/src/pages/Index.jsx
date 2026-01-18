@@ -8,6 +8,8 @@ import image2 from '../img/2.JPG';
 import cover3 from '../img/3.JPG';
 import churchQR from '../img/church_qr.png';
 import venueQR from '../img/venue_qr.png';
+import Church from "../img/Church.jpg";
+import Event from "../img/Event.jpg"
 
 import weddingSong from "../song/ido.mp3"
 
@@ -19,6 +21,8 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const Index = () => {
   // Refs for navigation
   const pageRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+  // Ref for focusing the RSVP input
+  const rsvpInputRef = useRef(null);
 
   const BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:5000'
@@ -35,16 +39,45 @@ const Index = () => {
   const [groupGuests, setGroupGuests] = useState([]);
   const [checkedGuests, setCheckedGuests] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const audioRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Helper to scroll to specific page
   const scrollToSection = (index) => {
     pageRefs[index].current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Focus effect when RSVP modal opens
+  useEffect(() => {
+    if (openModal) {
+      setTimeout(() => {
+        rsvpInputRef.current?.focus();
+      }, 100);
+    }
+  }, [openModal]);
+  
+  // Handle keyboard scrolling
+  useEffect(() => {
+    if (highlightedIndex >= 0 && dropdownRef.current) {
+      const container = dropdownRef.current;
+      const selectedItem = container.children[highlightedIndex];
+      if (selectedItem) {
+        const containerTop = container.scrollTop;
+        const containerBottom = containerTop + container.clientHeight;
+        const itemTop = selectedItem.offsetTop;
+        const itemBottom = itemTop + selectedItem.clientHeight;
+
+        if (itemTop < containerTop) {
+          container.scrollTop = itemTop;
+        } else if (itemBottom > containerBottom) {
+          container.scrollTop = itemBottom - container.clientHeight;
+        }
+      }
+    }
+  }, [highlightedIndex]);
 
   const toggleMusic = () => {
-    
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -69,7 +102,7 @@ const Index = () => {
 
     try {
       const resp = await fetchGuestList();
-      await delay(1200);
+      await delay(500);
       const cleaned = resp.map(g => ({ ...g, _n: normalize(g.FullName) }));
       setAllGuests(cleaned);
       setOpenModal(true);
@@ -87,7 +120,8 @@ const Index = () => {
   };
 
   const handleNameChange = (e) => {
-    const value = e.target.value;
+    // Force typing to Capital letters
+    const value = e.target.value.toUpperCase();
     setGuestName(value);
     setSelectedGuest(null);
 
@@ -103,7 +137,8 @@ const Index = () => {
   };
 
   const handleSelectGuest = (guest) => {
-    setGuestName(guest.FullName);
+    // Force selected result to Capital letters
+    setGuestName(guest.FullName.toUpperCase());
     setSelectedGuest(guest);
     setDropDown([]);
   };
@@ -127,9 +162,20 @@ const Index = () => {
 
   const submitAttendance = async (isAttending) => {
     setLoadingGuests(true);
+
+    let finalCheckedList = [...checkedGuests];
+    
+    if (!isAttending && selectedGuest) {
+      finalCheckedList = finalCheckedList.filter(name => name !== selectedGuest.FullName);
+    } else if (isAttending && selectedGuest) {
+      if (!finalCheckedList.includes(selectedGuest.FullName)) {
+        finalCheckedList.push(selectedGuest.FullName);
+      }
+    }
+
     const payload = groupGuests.map(g => ({
       ...g,
-      attending: isAttending ? checkedGuests.includes(g.FullName) : false,
+      attending: finalCheckedList.includes(g.FullName),
     }));
 
     try {
@@ -138,7 +184,7 @@ const Index = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ updates: payload }),
       });
-      await delay(800);
+      await delay(500);
       setSuccessModal({
         isActive: true,
         message: isAttending 
@@ -153,14 +199,12 @@ const Index = () => {
     }
   };
 
-// Effect to handle "Auto-play" on first interaction
   useEffect(() => {
     const playAudio = () => {
       if (audioRef.current && !isPlaying) {
         audioRef.current.play()
           .then(() => {
             setIsPlaying(true);
-            // Remove listeners once music starts
             window.removeEventListener('click', playAudio);
             window.removeEventListener('touchstart', playAudio);
             window.removeEventListener('scroll', playAudio);
@@ -169,12 +213,10 @@ const Index = () => {
       }
     };
 
-    // Add listeners for any user activity
     window.addEventListener('click', playAudio);
     window.addEventListener('touchstart', playAudio);
     window.addEventListener('scroll', playAudio);
 
-    // Intersection Observer for animations
     const sections = document.querySelectorAll('.page');
     const observer = new IntersectionObserver(
       entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
@@ -212,47 +254,39 @@ const Index = () => {
         </div>
       )}
 
-      {/* STICKY NAV WITH PAGE LOCATORS */}
       <div className="sticky-nav">
         <div className="nav-controls">
-          <button className="music-toggle" onClick={toggleMusic}>
+          {/* <button className="music-toggle" onClick={toggleMusic}>
             {isPlaying ? '🔊' : '🔇'}
-          </button>
-
+          </button> */}
+           <button className="nav-rsvp-btn" onClick={handleOpenRSVP}>RSVP</button>
            <button onClick={() => scrollToSection(0)}>Home</button>
            <button onClick={() => scrollToSection(1)}>Dates</button>
            <button onClick={() => scrollToSection(2)}>Program</button>
            <button onClick={() => scrollToSection(3)}>Attire</button>
            <button onClick={() => scrollToSection(4)}>Location</button>
-           <button className="nav-rsvp-btn" onClick={handleOpenRSVP}>RSVP</button>
         </div>
       </div>
 
-      {/* --- PAGE 1: HERO --- */}
       <div ref={pageRefs[0]} className="page hero" style={{ backgroundImage: `url(${image1})` }}>
         <div className="overlay" />
         <div className="hero-text">
           <div className="hero-welcome">Welcome to</div>
           <h1>Albert & Samantha</h1>
           <div className="hero-wedding">Wedding</div>
-          {/* <div className="hero-rsvp-message">Please RSVP by January 30th</div> */}
         </div>
       </div>
 
-      {/* --- PAGE 2: COUNTDOWN --- */}
       <div ref={pageRefs[1]} className="page countdown slim" style={{ backgroundImage: `url(${image2})` }}>
         <Countdown />
       </div>
 
-      {/* --- PAGE 3: ROADMAP --- */}
       <div ref={pageRefs[2]} className="page venues slim" style={{ backgroundImage: `url(${cover3})` }}>
         <div className="overlay" />
         <div className="venues-roadmap-elegant">
           <h2 className="venues-title">The Wedding Program</h2>
           <div className="tree-v-container">
             <div className="tree-v-trunk"></div>
-
-            {/* EVENT 1 */}
             <div className="tree-v-item branch-right ev-1">
               <div className="tree-v-node">💍</div>
               <div className="tree-v-content">
@@ -260,8 +294,6 @@ const Index = () => {
                 <h3>Wedding Ceremony</h3>
               </div>
             </div>
-
-            {/* EVENT 2 */}
             <div className="tree-v-item branch-left ev-2">
               <div className="tree-v-node">📸</div>
               <div className="tree-v-content">
@@ -270,8 +302,6 @@ const Index = () => {
                 <p>Grazing Table & Socials</p>
               </div>
             </div>
-
-            {/* EVENT 3 */}
             <div className="tree-v-item branch-right ev-3">
               <div className="tree-v-node">🥂</div>
               <div className="tree-v-content">
@@ -279,8 +309,6 @@ const Index = () => {
                 <h3>Welcome Toast</h3>
               </div>
             </div>
-
-            {/* EVENT 4 */}
             <div className="tree-v-item branch-left ev-4">
               <div className="tree-v-node">🍽️</div>
               <div className="tree-v-content">
@@ -288,8 +316,6 @@ const Index = () => {
                 <h3>Wedding Dinner</h3>
               </div>
             </div>
-
-            {/* EVENT 5 */}
             <div className="tree-v-item branch-right ev-5">
               <div className="tree-v-node">🍸</div>
               <div className="tree-v-content">
@@ -297,8 +323,6 @@ const Index = () => {
                 <h3>Cocktail Hour</h3>
               </div>
             </div>
-
-            {/* EVENT 6 */}
             <div className="tree-v-item branch-left ev-6">
               <div className="tree-v-node">💃</div>
               <div className="tree-v-content">
@@ -306,36 +330,30 @@ const Index = () => {
                 <h3>Celebration Dance</h3>
               </div>
             </div>
-
-            {/* EVENT 7 */}
             <div className="tree-v-item branch-right ev-7">
               <div className="tree-v-node">🎞️</div>
               <div className="tree-v-content">
                 <span className="tree-v-time">06:15 PM</span>
-                <h3>Same Day Edit</h3>
+                <h3>Same Day Edit Presentation</h3>
               </div>
             </div>
-
-            {/* EVENT 8 */}
             <div className="tree-v-item branch-left ev-8">
               <div className="tree-v-node">✨</div>
               <div className="tree-v-content">
                 <span className="tree-v-time">07:00 PM</span>
-                <h3>Grand Send-Off</h3>
+                <h3>End of Program</h3>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* --- PAGE 4: ATTIRE --- */}
       <div ref={pageRefs[3]} className="page attire-section">
         <div className="attire-container">
           <div className="attire-header">
             <h2 className="attire-title">What to wear?</h2>
             <div className="title-divider"></div>
           </div>
-
           <div className="attire-grid">
             <div className="sponsor-attire">
               <div className="attire-card-mini">
@@ -347,12 +365,10 @@ const Index = () => {
                 <p className="color-label dusty">Dusty Blue Formal Attire</p>
               </div>
             </div>
-
-            <div className="guest-attire-main">
+          <div className="guest-attire-main">
               <h3 className="dress-code">For Guests</h3>
               <p className="semi-formal">Semi-Formal attire in the following hues:</p>
               <p className="hue-list">Champagne, Beige, Soft Grey, Blue Gray & Dusty Blue</p>
-              
               <div className="color-palette-large">
                 <div className="swatch" style={{ backgroundColor: '#E3D2B4' }}></div>
                 <div className="swatch" style={{ backgroundColor: '#C5B49E' }}></div>
@@ -360,7 +376,6 @@ const Index = () => {
                 <div className="swatch" style={{ backgroundColor: '#8E9CAF' }}></div>
                 <div className="swatch" style={{ backgroundColor: '#718EA4' }}></div>
               </div>
-
               <div className="guest-guide">
                 <div className="guide-item">
                   <strong>Gentlemen</strong>
@@ -376,19 +391,17 @@ const Index = () => {
         </div>
       </div>
 
-      {/* --- PAGE 5: LOCATIONS --- */}
       <div ref={pageRefs[4]} className="page location-section">
         <div className="location-container">
           <div className="location-header">
             <h2 className="location-title">Locations</h2>
-            <p className="location-subtitle">Scan QR codes for Google Maps directions</p>
+            <p className="location-subtitle">Google Maps directions</p>
             <div className="title-divider"></div>
           </div>
-
           <div className="location-grid">
             <div className="location-card">
               <div className="qr-frame">
-                <img src={churchQR} alt="Church Location QR" className="qr-image" />
+                <img src={Church} alt="Church" className="qr-image" />
               </div>
               <div className="location-details">
                 <h3>National Shrine and Parish of Our Lady of Fatima</h3>
@@ -398,10 +411,9 @@ const Index = () => {
                 </a>
               </div>
             </div>
-
             <div className="location-card">
               <div className="qr-frame">
-                <img src={venueQR} alt="Venue Location QR" className="qr-image" />
+                <img src={Event} alt="Venue" className="qr-image" />
               </div>
               <div className="location-details">
                 <h3>Dalandanan Events Space</h3>
@@ -422,24 +434,39 @@ const Index = () => {
         Children={
           <form onSubmit={handleContinue}>
             <input
+              ref={rsvpInputRef}
               className='uppercase'
-              placeholder="Full Name"
+              placeholder="FULL NAME"
               value={guestName}
               onChange={handleNameChange}
+              onKeyDown={(e) => {
+                if (dropDown.length === 0) return;
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  setHighlightedIndex(prev => (prev < dropDown.length - 1 ? prev + 1 : prev));
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  setHighlightedIndex(prev => (prev > 0 ? prev - 1 : 0));
+                } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+                  e.preventDefault();
+                  handleSelectGuest(dropDown[highlightedIndex]);
+                }
+              }}
             />
-            {dropDown.length > 0 && (
-              <div className="guest-options uppercase">
-                {dropDown.map(g => (
-                  <div
-                    key={`${g.id}-${g.FullName}`}
-                    className="guest-option"
-                    onClick={() => handleSelectGuest(g)}
-                  >
-                    {g.FullName}
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* 3. ADD THE REF AND CLASS TO THE DROPDOWN CONTAINER */}
+            <div className="guest-dropdown-scroll" ref={dropdownRef}>
+              {dropDown.map((g, index) => (
+                <div
+                  key={`${g.id}-${g.FullName}`}
+                  className={`guest-option ${highlightedIndex === index ? 'highlighted' : ''}`}
+                  onClick={() => handleSelectGuest(g)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                >
+                  {g.FullName.toUpperCase()}
+                </div>
+              ))}
+            </div>
+            
             <button
               type="submit"
               className={`continue-btn ${selectedGuest ? 'enabled' : ''}`}
@@ -447,6 +474,7 @@ const Index = () => {
             >
               CONTINUE
             </button>
+            <h5 className='rsvp-formal-note'> While we extend a warm welcome to guests of all ages, we graciously suggest an adults-only celebration... </h5>
           </form>
         }
       />
@@ -457,16 +485,19 @@ const Index = () => {
         onClose={handleCloseAll}
         Children={
           <>
-            {groupGuests.map(g => (
-              <label key={`${g.id}-${g.FullName}`} className="checkbox-row">
-                <input
-                  type="checkbox"
-                  checked={checkedGuests.includes(g.FullName)}
-                  onChange={() => toggleGuest(g.FullName)}
-                />
-                <span className='uppercase'>{g.FullName}</span>
-              </label>
-            ))}
+            {/* 4. ADD WRAPPER FOR CHECKBOX SCROLLING */}
+            <div className="guest-checkbox-scroll">
+              {groupGuests.map(g => (
+                <label key={`${g.id}-${g.FullName}`} className="checkbox-row">
+                  <input
+                    type="checkbox"
+                    checked={checkedGuests.includes(g.FullName)}
+                    onChange={() => toggleGuest(g.FullName)}
+                  />
+                  <span className='uppercase'>{g.FullName.toUpperCase()}</span>
+                </label>
+              ))}
+            </div>
             <button className="continue-btn enabled" onClick={() => submitAttendance(true)}>
               💖 I WILL ATTEND
             </button>

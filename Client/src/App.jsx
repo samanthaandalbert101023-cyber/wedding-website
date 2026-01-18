@@ -9,7 +9,7 @@ function App() {
       {/* Landing page with the envelope */}
       <Route path="/" element={<Envelope />} />
       
-      {/* Dashboard/Home page after opening */}
+      {/* Index /Home page after opening */}
       <Route path="/Index" element={<Index />} />
     </Routes>
   );

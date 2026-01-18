@@ -10,7 +10,7 @@ const Envelope = ({ onOpenComplete }) => {
     const hasOpened = localStorage.getItem('invitationOpened');
     console.log('hasOpened', hasOpened)
     if (hasOpened === 'true') {
-      navigate('/dashboard', { replace: true });
+      navigate('/Index', { replace: true });
     }
   }, [navigate]);
 
@@ -20,7 +20,7 @@ const Envelope = ({ onOpenComplete }) => {
     // 1. Call the completion prop logic if needed
     if (onOpenComplete) onOpenComplete();
     
-    // 2. Redirect to the dashboard
+    // 2. Redirect to the Index
     navigate('/Index', { replace: true}); 
   };
 
