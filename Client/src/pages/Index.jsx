@@ -153,15 +153,42 @@ const Index = () => {
     }
   };
 
+// Effect to handle "Auto-play" on first interaction
   useEffect(() => {
+    const playAudio = () => {
+      if (audioRef.current && !isPlaying) {
+        audioRef.current.play()
+          .then(() => {
+            setIsPlaying(true);
+            // Remove listeners once music starts
+            window.removeEventListener('click', playAudio);
+            window.removeEventListener('touchstart', playAudio);
+            window.removeEventListener('scroll', playAudio);
+          })
+          .catch(err => console.log("Autoplay blocked, waiting for user interaction."));
+      }
+    };
+
+    // Add listeners for any user activity
+    window.addEventListener('click', playAudio);
+    window.addEventListener('touchstart', playAudio);
+    window.addEventListener('scroll', playAudio);
+
+    // Intersection Observer for animations
     const sections = document.querySelectorAll('.page');
     const observer = new IntersectionObserver(
       entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
       { threshold: 0.3 }
     );
     sections.forEach(s => observer.observe(s));
-    return () => observer.disconnect();
-  }, []);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('click', playAudio);
+      window.removeEventListener('touchstart', playAudio);
+      window.removeEventListener('scroll', playAudio);
+    };
+  }, [isPlaying]);
 
   return (
     <div className="app-root">
@@ -208,7 +235,7 @@ const Index = () => {
           <div className="hero-welcome">Welcome to</div>
           <h1>Albert & Samantha</h1>
           <div className="hero-wedding">Wedding</div>
-          <div className="hero-rsvp-message">Please RSVP by January 30th</div>
+          {/* <div className="hero-rsvp-message">Please RSVP by January 30th</div> */}
         </div>
       </div>
 
@@ -364,9 +391,9 @@ const Index = () => {
                 <img src={churchQR} alt="Church Location QR" className="qr-image" />
               </div>
               <div className="location-details">
-                <h3>CEREMONY</h3>
+                <h3>National Shrine and Parish of Our Lady of Fatima</h3>
                 <div className="location-underline"></div>
-                <a href="PASTE_CHURCH_MAPS_LINK_HERE" target="_blank" rel="noreferrer" className="maps-btn">
+                <a href="https://maps.app.goo.gl/DoykaVgzTJeZtCCp8" target="_blank" rel="noreferrer" className="maps-btn">
                   Open in Maps
                 </a>
               </div>
@@ -377,9 +404,9 @@ const Index = () => {
                 <img src={venueQR} alt="Venue Location QR" className="qr-image" />
               </div>
               <div className="location-details">
-                <h3>RECEPTION</h3>
+                <h3>Dalandanan Events Space</h3>
                 <div className="location-underline"></div>
-                <a href="PASTE_VENUE_MAPS_LINK_HERE" target="_blank" rel="noreferrer" className="maps-btn">
+                <a href="https://maps.app.goo.gl/ubeDC4arvKWScP3r9" target="_blank" rel="noreferrer" className="maps-btn">
                   Open in Maps
                 </a>
               </div>
