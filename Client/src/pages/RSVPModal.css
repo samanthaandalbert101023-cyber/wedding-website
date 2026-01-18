@@ -1,0 +1,165 @@
+/* =========================
+   OVERLAY
+========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* =========================
+   MODAL CONTAINER
+========================= */
+.modal.wedding-modal {
+  position: relative;
+  background: linear-gradient(180deg, #fdfefe, #f2f6fb);
+  width: 92%;
+  max-width: 620px;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  animation: modalFadeIn 0.35s ease;
+}
+
+/* =========================
+   FLORAL DECOR (PURE CSS)
+========================= */
+.floral {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle at center,
+    rgba(180, 200, 230, 0.6),
+    rgba(180, 200, 230, 0.2),
+    transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.floral-top-left {
+  top: -40px;
+  left: -40px;
+}
+
+.floral-top-right {
+  top: -40px;
+  right: -40px;
+}
+
+.floral-bottom-left {
+  bottom: -40px;
+  left: -40px;
+}
+
+.floral-bottom-right {
+  bottom: -40px;
+  right: -40px;
+}
+
+/* =========================
+   CONTENT
+========================= */
+.modal-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+/* =========================
+   TITLE
+========================= */
+.modal-title-container {
+  margin-bottom: 1.5rem;
+}
+
+.modal-title-container h2 {
+  font-family: 'Mea Culpa', cursive;
+  font-size: 4.5rem;
+  margin: 0;
+  color: #082a4e;
+}
+
+.modal-title-container h3 {
+  font-family: 'DM Serif Text', serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.15em;
+  color: #7a8fa8;
+  margin-top: -0.25rem;
+}
+
+/* =========================
+   BODY
+========================= */
+.modal-body {
+  margin-top: 1rem;
+}
+
+/* Inputs inside modal */
+.modal-body input,
+.modal-body select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #cfd8e3;
+  background: white;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.modal-body button,
+.close-button {
+  font-family: inherit;
+}
+
+/* Close button */
+.close-button {
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid #cfd8e3;
+  background: white;
+  color: #5b7fa6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.close-button:hover {
+  background: #eef3f9;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 480px) {
+  .modal-title-container h2 {
+    font-size: 3.5rem;
+  }
+
+  .modal-title-container h3 {
+    font-size: 1.1rem;
+  }
+}

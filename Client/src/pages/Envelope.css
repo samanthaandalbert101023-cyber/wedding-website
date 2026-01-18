@@ -1,0 +1,236 @@
+/* =========================================
+   1. BASE & RESET
+   ========================================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #fdfbfb;
+  font-family: 'DM Serif Text', serif;
+  height: 100%;
+  width: 100%;
+  overflow: hidden; 
+}
+
+/* =========================================
+   2. ENVELOPE LANDING (TIGHTER SPACING)
+   ========================================= */
+.envelope-landing {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, #fdfbfb 0%, #e8eff5 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Keeps everything centered */
+  align-items: center;
+  z-index: 2000;
+  padding: 10px;
+}
+
+.envelope-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  transition: transform 0.8s ease-in-out;
+}
+
+/* Minimal shift: moves envelope down just enough to clear the letter */
+.is-open .envelope-container {
+  transform: translateY(80px); 
+}
+
+.envelope-wrapper {
+  position: relative;
+  width: 90vw;
+  max-width: 360px;
+  aspect-ratio: 3.5 / 2.3;
+  cursor: pointer;
+  perspective: 2000px;
+}
+
+.envelope {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0f172a; 
+  box-shadow: 0 15px 40px rgba(15, 23, 42, 0.2);
+  border-radius: 4px;
+}
+
+.top-flap {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  clip-path: polygon(0 0, 50% 50%, 100% 0);
+  z-index: 10; 
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top;
+}
+
+.front-cover {
+  position: absolute;
+  inset: 0;
+  background: #0f172a;
+  clip-path: polygon(0 38%, 100% 38%, 100% 100%, 0 100%);
+  z-index: 8; 
+}
+
+.is-open .top-flap { transform: rotateX(180deg); z-index: 1; }
+
+/* =========================================
+   WAX SEAL
+   ========================================= */
+.seal {
+  position: absolute;
+  top: 38%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 11;
+  transition: opacity 0.4s ease;
+}
+
+.wax-texture {
+  width: 55px; height: 55px;
+  background: #ffffff; 
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1.5px solid #C5A059;
+}
+
+.seal-initials { color: #C5A059; font-size: 0.9rem; letter-spacing: 1.5px; }
+
+/* =========================================
+   3. THE PAPER (FIXED TOP HEIGHT)
+   ========================================= */
+.pocket-container {
+  position: absolute;
+  inset: 0;
+  overflow: visible; 
+  z-index: 5;
+}
+
+.letter-preview {
+  position: absolute;
+  top: 15px; /* Tucked high to hide bottom overlap */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%; 
+  height: 90%; 
+  background: #ffffff;
+  border: 10px solid #0f172a; 
+  outline: 1px solid #C5A059;
+  outline-offset: -6px;
+  z-index: 4;
+  transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1), 
+              height 1s ease-out;
+  padding: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.is-open .letter-preview {
+  /* Reduced lift to avoid hitting top and eliminate blank space */
+  transform: translate(-50%, -72%); 
+  height: clamp(340px, 60vh, 460px); 
+  z-index: 20;
+}
+
+.flower-accent {
+  position: absolute;
+  color: #C5A059; 
+  font-size: 1.8rem; 
+  opacity: 0.12;
+  pointer-events: none;
+}
+.top-right { top: 8px; right: 8px; }
+.bottom-left { bottom: 8px; left: 8px; }
+.top-left { top: 8px; left: 8px; opacity: 0.05; }
+.bottom-right { bottom: 8px; right: 8px; opacity: 0.05; }
+
+.letter-content {
+  text-align: center;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: center; /* Keeps content tight together */
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.5s 0.7s;
+  padding: 10px;
+  gap: 12px; /* Controls space between text elements */
+}
+
+.is-open .letter-content { opacity: 1; }
+
+/* =========================================
+   4. TYPOGRAPHY & BUTTON
+   ========================================= */
+.invite-question {
+  font-size: 0.6rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.script-font {
+  font-family: 'Mea Culpa', cursive;
+  font-size: clamp(1.8rem, 7vw, 2.5rem);
+  color: #0f172a;
+  margin: 0;
+}
+
+.and-text {
+  color: #C5A059;
+  font-size: 0.9rem;
+  margin: -5px 0;
+}
+
+.date-font {
+  font-size: 0.7rem;
+  color: #475569;
+  letter-spacing: 1.5px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(197, 160, 89, 0.2);
+  border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+  width: 100%;
+  max-width: 180px;
+}
+
+.enter-btn {
+  background: #0f172a; 
+  color: #ffffff;
+  border: 1px solid #C5A059;
+  padding: 10px 20px;
+  font-size: 0.65rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 10px;
+}
+
+/* =========================================
+   INSTRUCTION TEXT
+   ========================================= */
+.instruction-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.instruction-text {
+  color: #0f172a;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  opacity: 0.5;
+}
+
+.is-open .seal { opacity: 0; }
+
+@media (max-width: 480px) {
+  .is-open .envelope-container { transform: translateY(60px); }
+  .is-open .letter-preview { height: 380px; }
+}
