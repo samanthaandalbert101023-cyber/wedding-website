@@ -56,6 +56,8 @@ app.use(
       "http://localhost:5174",
       "http://localhost:3000",
       "http://wedding-website1.onrender.com",
+      "https://albertandsamanthawedding.site",
+      "https://www.albertandsamanthawedding.site",
       "https://rsvp-e-invite-738aa.web.app",
       "https://rsvp-e-invite-738aa.firebaseapp.com",
     ],
