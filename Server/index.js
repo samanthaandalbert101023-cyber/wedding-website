@@ -63,6 +63,8 @@ app.use(
     ],
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"], // Added more headers
+    credentials: true,
   })
 );
 
