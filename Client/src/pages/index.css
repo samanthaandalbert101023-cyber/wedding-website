@@ -14,7 +14,7 @@ html, body {
   color: white;
   font-family: 'DM Serif Text', serif;
   overflow-x: hidden; /* Prevent horizontal jitter */
-  verflow-x: hidden;
+  /* verflow-x: hidden; */
   overflow-y: auto; /* Pinapayagan na ang vertical scrolling */
   height: auto;     /* Iniiwasan ang pag-lock sa 100% height */
   -webkit-overflow-scrolling: touch; /* Para smooth sa iPhone/Android */
@@ -753,7 +753,7 @@ html, body {
   color: white;
   font-family: 'DM Serif Text', serif;
   overflow-x: hidden; /* Prevent horizontal jitter */
-  verflow-x: hidden;
+  /* verflow-x: hidden; */
   overflow-y: auto; /* Pinapayagan na ang vertical scrolling */
   height: auto;     /* Iniiwasan ang pag-lock sa 100% height */
   -webkit-overflow-scrolling: touch; /* Para smooth sa iPhone/Android */
