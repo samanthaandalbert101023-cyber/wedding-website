@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
 
 /* =========================
    BASE
@@ -369,7 +371,7 @@ form {
   width: 50px;
   height: 50px;
   background: #fff;
-  border: 2px solid rgba(137, 207, 240, 0.3);
+  border: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -396,13 +398,13 @@ form {
 
 .tree-v-content {
   position: relative;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(190, 10, 10, 0.05);
   backdrop-filter: blur(15px);
   padding: 22px 28px;
   border-radius: 20px;
   border: 1px solid rgba(137, 207, 240, 0.1);
   width: 280px;
-  opacity: 0.3;
+  /* opacity: 0.7; */
   transition: all 0.5s ease; /* Faster transition */
   /* FASTER: Changed from 40s to 16s */
   animation: boxGlowLoop 16s infinite;
@@ -462,7 +464,7 @@ form {
 
 .tree-v-time { display: block; font-family: 'DM Serif Text', serif; color: #89CFF0; letter-spacing: 1.5px; font-size: 0.85rem; margin-bottom: 4px; }
 .tree-v-content h3 { font-family: 'DM Serif Text', serif; margin: 0; font-size: 1.2rem; color: #fff; font-weight: 400; }
-.tree-v-content p { margin: 5px 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+.tree-v-content p { margin: 5px 0 0; font-size: 0.8rem; color: rgba(255, 223, 223, 0.6); }
 
 @media (max-width: 768px) {
   .tree-v-trunk, .tree-v-node { left: 30px !important; transform: translate(-50%, -50%) !important; }
@@ -1135,7 +1137,7 @@ form {
 
 .tree-v-content {
   position: relative;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(252, 20, 20, 0.05);
   backdrop-filter: blur(15px);
   padding: 22px 28px;
   border-radius: 20px;
@@ -1162,9 +1164,9 @@ form {
   content: "❤";
   position: absolute;
   top: -12px;
-  color: #89CFF0;
+  color: #00aeff;
   font-size: 1.1rem;
-  text-shadow: 0 0 10px #89CFF0;
+  text-shadow: 0 0 10px #008ed0;
   opacity: 0;
   /* FASTER: Changed from 40s to 16s */
   animation: heartSyncLoop 16s infinite, heartPulseEffect 1s infinite;
@@ -1616,5 +1618,62 @@ input.uppercase {
   }
   .checkbox-row {
     padding: 12px;
+  }
+}
+
+/* Footer Styling */
+.wedding-footer {
+  padding: 20px 20px;
+  padding-bottom: 20px;
+  background-color: #ffffff; 
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid #eee;
+}
+
+.footer-container {
+  max-width: 650px;
+}
+
+.footer-message {
+  font-family: 'Assistant', sans-serif;
+  font-size: .2rem;
+  line-height: 1;
+  color: #4a4a4a;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+.footer-signature {
+  margin-top: 50px;
+}
+
+.footer-signature p {
+  font-family: 'Assistant', sans-serif;
+  font-size: .5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.couple-names {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #718EA4; /* This matches your Dusty Blue theme */
+  margin: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .couple-names {
+    font-size: 2.2rem;
+  }
+  .footer-message {
+    font-size: .8rem;
   }
 }

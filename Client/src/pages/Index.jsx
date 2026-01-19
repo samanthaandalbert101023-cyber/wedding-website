@@ -92,11 +92,9 @@ const fetchGuestList = async () => {
 
     // You MUST await res.json() to actually get the data
     const data = await res.json(); 
-    
-    console.log('Guest List Data:', data);
     return data;
   } catch (error) {
-    console.error('Fetch error:', error);
+
   }
 };
 
@@ -115,7 +113,6 @@ const fetchGuestList = async () => {
       setAllGuests(cleaned);
       setOpenModal(true);
     } catch (err) {
-      console.error(err);
       // ADDITIONAL: Pop error modal if server fails to load list
       setErrorModal({ 
         isActive: true, 
@@ -494,6 +491,27 @@ const fetchGuestList = async () => {
         }
       />
 
+
+      <footer ref={pageRefs[5]} className="wedding-footer">
+        <div className="footer-container">
+          <div className="footer-content">
+            <p className="footer-message">
+              The greatest gift we could receive is your presence by our side on this special day.
+            </p>
+            <p className="footer-message">
+              If you wish to bless us further, a contribution toward our new life together 
+              would help us plant the seeds of our dreams and gather memories that 
+              will bloom forever in our hearts.
+            </p>
+            <div className="footer-signature">
+              <p>With all our love and gratitude,</p>
+              <h3 className="couple-names">Sam & Bert</h3>
+            </div>
+          </div>
+        </div>
+      </footer>
+      
+        
       <RSVPModal
         isOpen={openGroupModal}
         title="Your Attendance"
