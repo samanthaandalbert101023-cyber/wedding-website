@@ -1623,40 +1623,42 @@ input.uppercase {
 
 /* Footer Styling */
 .wedding-footer {
-  padding: 20px 20px;
-  padding-bottom: 20px;
+  padding: 60px 20px; /* Increased padding for a more premium feel */
   background-color: #ffffff; 
   text-align: center;
   display: flex;
+  flex-direction: column; /* Ensures elements stack vertically */
   justify-content: center;
   align-items: center;
   border-top: 1px solid #eee;
 }
 
 .footer-container {
+  width: 100%;
   max-width: 650px;
+  margin: 0 auto;
 }
 
 .footer-message {
   font-family: 'Assistant', sans-serif;
-  font-size: .2rem;
-  line-height: 1;
+  font-size: 1.1rem; /* Adjusted from .2rem for readability */
+  line-height: 1.6;
   color: #4a4a4a;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   letter-spacing: 0.5px;
 }
 
 .footer-signature {
-  margin-top: 50px;
+  margin-top: 40px;
 }
 
 .footer-signature p {
   font-family: 'Assistant', sans-serif;
-  font-size: .5rem;
+  font-size: 0.8rem; /* Adjusted from .5rem */
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #888;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .couple-names {
@@ -1664,16 +1666,35 @@ input.uppercase {
   font-size: 2.8rem;
   font-weight: 400;
   font-style: italic;
-  color: #718EA4; /* This matches your Dusty Blue theme */
-  margin: 1;
+  color: #718EA4; 
+  margin: 0;
 }
 
-/* Mobile adjustments */
-@media (max-width: 600px) {
+/* --- Responsive Adjustments --- */
+
+/* Tablets and small desktops */
+@media (max-width: 768px) {
   .couple-names {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
+  }
+  .wedding-footer {
+    padding: 40px 15px;
+  }
+}
+
+/* Mobile Devices */
+@media (max-width: 480px) {
+  .couple-names {
+    font-size: 1.8rem; /* Scaled down for small screens */
   }
   .footer-message {
-    font-size: .8rem;
+    font-size: 0.95rem;
+    padding: 0 10px; /* Prevents text from hitting screen edges */
+  }
+  .footer-signature {
+    margin-top: 30px;
+  }
+  .footer-signature p {
+    font-size: 0.7rem;
   }
 }
