@@ -6,11 +6,8 @@ import Modal from '../components/Modal';
 import image1 from '../img/1.JPG';
 import image2 from '../img/2.JPG';
 import cover3 from '../img/3.JPG';
-import churchQR from '../img/church_qr.png';
-import venueQR from '../img/venue_qr.png';
 import Church from "../img/Church.jpg";
 import Event from "../img/Event.jpg"
-
 import weddingSong from "../song/ido.mp3"
 
 import './Index.css';
@@ -19,17 +16,19 @@ const normalize = (str = '') => str.toLowerCase().replace(/\s+/g, ' ').trim();
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const Index = () => {
-  // Refs for navigation
   const pageRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
-  // Ref for focusing the RSVP input
   const rsvpInputRef = useRef(null);
 
-  const BASE_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:5000'
-    : 'https://wedding-website1.onrender.com';
+// const BASE_URL = window.location.hostname === 'localhost'
+//   ? 'http://192.168.3.7:5173/'
+//   : 'https://wedding-website1.onrender.com';
+const BASE_URL = 'https://wedding-website1.onrender.com';
 
   const [loadingGuests, setLoadingGuests] = useState(false);
   const [successModal, setSuccessModal] = useState({ isActive: false, message: '' });
+  // ADDITIONAL: Error modal state
+  const [errorModal, setErrorModal] = useState({ isActive: false, message: '' });
+  
   const [openModal, setOpenModal] = useState(false);
   const [openGroupModal, setOpenGroupModal] = useState(false);
   const [allGuests, setAllGuests] = useState([]);
@@ -43,12 +42,10 @@ const Index = () => {
   const audioRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Helper to scroll to specific page
   const scrollToSection = (index) => {
     pageRefs[index].current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Focus effect when RSVP modal opens
   useEffect(() => {
     if (openModal) {
       setTimeout(() => {
@@ -57,7 +54,6 @@ const Index = () => {
     }
   }, [openModal]);
   
-  // Handle keyboard scrolling
   useEffect(() => {
     if (highlightedIndex >= 0 && dropdownRef.current) {
       const container = dropdownRef.current;
@@ -86,11 +82,23 @@ const Index = () => {
     setIsPlaying(!isPlaying);
   };
 
-  const fetchGuestList = async () => {
+const fetchGuestList = async () => {
+  try {
     const res = await fetch(`${BASE_URL}/api/guestlist`);
-    if (!res.ok) throw new Error('Failed to fetch guest list');
-    return res.json();
-  };
+    
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    // You MUST await res.json() to actually get the data
+    const data = await res.json(); 
+    
+    console.log('Guest List Data:', data);
+    return data;
+  } catch (error) {
+    console.error('Fetch error:', error);
+  }
+};
 
   const handleOpenRSVP = async () => {
     setLoadingGuests(true);
@@ -108,6 +116,11 @@ const Index = () => {
       setOpenModal(true);
     } catch (err) {
       console.error(err);
+      // ADDITIONAL: Pop error modal if server fails to load list
+      setErrorModal({ 
+        isActive: true, 
+        message: 'We could not load the guest list at this moment.\n\nPlease check your internet connection or try again later.' 
+      });
     } finally {
       setLoadingGuests(false);
     }
@@ -117,10 +130,10 @@ const Index = () => {
     setOpenModal(false);
     setOpenGroupModal(false);
     setSuccessModal({ isActive: false, message: '' });
+    setErrorModal({ isActive: false, message: '' }); // Clear error modal
   };
 
   const handleNameChange = (e) => {
-    // Force typing to Capital letters
     const value = e.target.value.toUpperCase();
     setGuestName(value);
     setSelectedGuest(null);
@@ -137,7 +150,6 @@ const Index = () => {
   };
 
   const handleSelectGuest = (guest) => {
-    // Force selected result to Capital letters
     setGuestName(guest.FullName.toUpperCase());
     setSelectedGuest(guest);
     setDropDown([]);
@@ -179,11 +191,14 @@ const Index = () => {
     }));
 
     try {
-      await fetch(`${BASE_URL}/api/guestlist/attending`, {
+      const res = await fetch(`${BASE_URL}/api/guestlist/attending`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ updates: payload }),
       });
+      
+      if (!res.ok) throw new Error('Server Error');
+
       await delay(500);
       setSuccessModal({
         isActive: true,
@@ -192,8 +207,12 @@ const Index = () => {
           : 'Thank you for letting us know 🤍\n\nWhile we’ll miss celebrating with you, we truly appreciate your response.',
       });
       setOpenGroupModal(false);
-    } catch {
-      setSuccessModal({ isActive: true, message: 'Something went wrong 🤍\n\nPlease try again.' });
+    } catch (err) {
+      // ADDITIONAL: Specific error modal for submission failure
+      setErrorModal({ 
+        isActive: true, 
+        message: 'Something went wrong while saving your response 🤍\n\nPlease try again or contact us directly.' 
+      });
     } finally {
       setLoadingGuests(false);
     }
@@ -256,9 +275,6 @@ const Index = () => {
 
       <div className="sticky-nav">
         <div className="nav-controls">
-          {/* <button className="music-toggle" onClick={toggleMusic}>
-            {isPlaying ? '🔊' : '🔇'}
-          </button> */}
            <button className="nav-rsvp-btn" onClick={handleOpenRSVP}>RSVP</button>
            <button onClick={() => scrollToSection(0)}>Home</button>
            <button onClick={() => scrollToSection(1)}>Dates</button>
@@ -453,7 +469,6 @@ const Index = () => {
                 }
               }}
             />
-            {/* 3. ADD THE REF AND CLASS TO THE DROPDOWN CONTAINER */}
             <div className="guest-dropdown-scroll" ref={dropdownRef}>
               {dropDown.map((g, index) => (
                 <div
@@ -485,7 +500,6 @@ const Index = () => {
         onClose={handleCloseAll}
         Children={
           <>
-            {/* 4. ADD WRAPPER FOR CHECKBOX SCROLLING */}
             <div className="guest-checkbox-scroll">
               {groupGuests.map(g => (
                 <label key={`${g.id}-${g.FullName}`} className="checkbox-row">
@@ -508,12 +522,25 @@ const Index = () => {
         }
       />
 
+      {/* Success Modal */}
       <Modal
         isOpen={successModal.isActive}
         onClose={handleCloseAll}
         title="RSVP Update"
       >
         <p style={{ whiteSpace: 'pre-line' }}>{successModal.message}</p>
+      </Modal>
+
+      {/* ADDITIONAL: Error Modal */}
+      <Modal
+        isOpen={errorModal.isActive}
+        onClose={handleCloseAll}
+        title="Notice"
+      >
+        <p style={{ whiteSpace: 'pre-line', textAlign: 'center' }}>{errorModal.message}</p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+          <button className="continue-btn enabled" onClick={handleCloseAll}>CLOSE</button>
+        </div>
       </Modal>
     </div>
   );
