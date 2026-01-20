@@ -73,6 +73,8 @@ const BASE_URL = 'https://wedding-website1.onrender.com';
     }
   }, [highlightedIndex]);
 
+  
+
   const toggleMusic = () => {
     if (isPlaying) {
       audioRef.current.pause();
@@ -215,42 +217,50 @@ const fetchGuestList = async () => {
     }
   };
 
-  useEffect(() => {
-    const playAudio = () => {
-      if (audioRef.current && !isPlaying) {
-        audioRef.current.play()
-          .then(() => {
-            setIsPlaying(true);
-            window.removeEventListener('click', playAudio);
-            window.removeEventListener('touchstart', playAudio);
-            window.removeEventListener('scroll', playAudio);
-          })
-          .catch(err => console.log("Autoplay blocked, waiting for user interaction."));
-      }
-    };
+useEffect(() => {
+  // Use a local variable to track if we've successfully started playback
+  // to avoid multiple play attempts during re-renders.
+  let started = false;
 
-    window.addEventListener('click', playAudio);
-    window.addEventListener('touchstart', playAudio);
-    window.addEventListener('scroll', playAudio);
+  const playAudio = () => {
+    if (audioRef.current && !started) {
+      audioRef.current.play()
+        .then(() => {
+          setIsPlaying(true);
+          started = true;
+          // We keep the listeners active for a moment or rely on the 'started' flag
+          // to prevent "cutting" during the transition
+        })
+        .catch(err => {
+          console.log("Waiting for user interaction to play audio...");
+        });
+    }
+  };
 
-    const sections = document.querySelectorAll('.page');
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
-      { threshold: 0.3 }
-    );
-    sections.forEach(s => observer.observe(s));
+  // Listeners for initial interaction
+  window.addEventListener('click', playAudio);
+  window.addEventListener('touchstart', playAudio);
+  window.addEventListener('scroll', playAudio);
 
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('click', playAudio);
-      window.removeEventListener('touchstart', playAudio);
-      window.removeEventListener('scroll', playAudio);
-    };
-  }, [isPlaying]);
+  // Intersection Observer for animations
+  const sections = document.querySelectorAll('.page');
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
+    { threshold: 0.3 }
+  );
+  sections.forEach(s => observer.observe(s));
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('click', playAudio);
+    window.removeEventListener('touchstart', playAudio);
+    window.removeEventListener('scroll', playAudio);
+  };
+}, []); // EMPTY dependency array is key: this runs once on mount
 
   return (
     <div className="app-root">
-      <audio ref={audioRef} src={weddingSong} loop />
+      <audio ref={audioRef} src={weddingSong} loop preload="auto" />
       {loadingGuests && (
         <div className="heart-loader">
           {Array.from({ length: 40 }).map((_, i) => (
@@ -560,6 +570,32 @@ const fetchGuestList = async () => {
           <button className="continue-btn enabled" onClick={handleCloseAll}>CLOSE</button>
         </div>
       </Modal>
+
+      {loadingGuests && (
+        <div className="heart-loader">
+          {/* ADD THIS TEXT CONTAINER */}
+          <div className="loader-text-container">
+            <h2 className="loading-title">Loading...</h2>
+            <p className="loading-subtitle">Please wait, almost there...</p>
+          </div>
+
+          {/* KEEP YOUR EXISTING HEART MAPPING */}
+          {Array.from({ length: 40 }).map((_, i) => (
+            <span
+              key={i}
+              className="heart"
+              style={{
+                left: `${Math.random() * 100}%`,
+                fontSize: `${1.5 + Math.random() * 2.5}rem`,
+                animationDuration: `${3 + Math.random() * 3}s`,
+                animationDelay: `${Math.random() * 0.5}s`,
+              }}
+            >
+              ❤
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
