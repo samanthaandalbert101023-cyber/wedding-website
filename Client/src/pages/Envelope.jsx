@@ -42,11 +42,11 @@ const Envelope = ({ onOpenComplete }) => {
                 <div className="letter-content">
                   <p className="invite-question">The Wedding of</p>
                   
-                  <h2 className="script-font">Samantha</h2>
-                  <span className="and-text">&</span>
                   <h2 className="script-font">Albert</h2>
+                  <span className="and-text">&</span>
+                  <h2 className="script-font">Samantha</h2>
                   
-                  <p className="date-font">FEBRUARY 14, 2025</p>
+                  <p className="date-font">FEBRUARY 14, 2026</p>
                   
                   <button 
                     className="enter-btn" 
