@@ -286,8 +286,9 @@ useEffect(() => {
            <button onClick={() => scrollToSection(0)}>Home</button>
            <button onClick={() => scrollToSection(1)}>Dates</button>
            <button onClick={() => scrollToSection(2)}>Program</button>
-           <button onClick={() => scrollToSection(3)}>Attire</button>
-           <button onClick={() => scrollToSection(4)}>Location</button>
+           <button onClick={() => scrollToSection(3)}>Entourage</button>
+           <button onClick={() => scrollToSection(4)}>Attire</button>
+           <button onClick={() => scrollToSection(5)}>Location</button>
         </div>
       </div>
 
@@ -372,6 +373,7 @@ useEffect(() => {
       </div>
 
       {/* New Entourage Section */}
+      <div ref={pageRefs[3]} className="page location-section">
       <div className="page entourage-section">
         <div className="entourage-container">
           <h2 className="entourage-main-title">The Entourage</h2>
@@ -505,8 +507,10 @@ useEffect(() => {
           </div>
         </div>
       </div>
+  </div>
 
-      <div ref={pageRefs[3]} className="page attire-section">
+
+      <div ref={pageRefs[4]} className="page attire-section">
         <div className="attire-container">
           <div className="attire-header">
             <h2 className="attire-title">What to wear?</h2>
@@ -549,7 +553,7 @@ useEffect(() => {
         </div>
       </div>
 
-      <div ref={pageRefs[4]} className="page location-section">
+      <div ref={pageRefs[5]} className="page location-section">
         <div className="location-container">
           <div className="location-header">
             <h2 className="location-title">Locations</h2>
