@@ -371,6 +371,141 @@ useEffect(() => {
         </div>
       </div>
 
+      {/* New Entourage Section */}
+      <div className="page entourage-section">
+        <div className="entourage-container">
+          <h2 className="entourage-main-title">The Entourage</h2>
+          
+          <div className="parents-grid">
+            <div className="parents-group">
+              <h4>Parents of the Groom</h4>
+              <p>Antonio Francisco Britanico</p>
+              <p>Leilani Rosali Britanico</p>
+            </div>
+            <div className="parents-group">
+              <h4>Parents of the Bride</h4>
+              <p>Lucas Lumantao Enad</p>
+              <p>Elisabeth Agad Enad</p>
+            </div>
+          </div>
+
+          <h3 className="section-subtitle">Principal Sponsors</h3>
+          <div className="sponsors-grid">
+            <div className="sponsor-col">
+              <p>PB Rizalino Ferrer</p>
+              <p>Engr. Generoso O. Basiloña Jr.</p>
+              <p>Hon. Edgardo Dizon</p>
+              <p>Mr. Cesar Divinagracia</p>
+              <p>Mr. Berlin De Leon</p>
+              <p>Atty. Romeo Montefalco</p>
+              <p>Mr. Felipe Agad</p>
+              <p>Mr. Romeo Agad</p>
+              <p>Mr. Jonathan Rosali</p>
+              <p>Mr. Armando Agad</p>
+              <p>Mr. Romelo Agad</p>
+              <p>Mr. Aleben Ramos</p>
+            </div>
+            <div className="sponsor-col">
+              <p>Mrs. Judith Cruz</p>
+              <p>Dr. Joann Basiloña, MD FPPS</p>
+              <p>Mrs. Ellaine Manalaysay</p>
+              <p>Mrs. Josefa Oi</p>
+              <p>Mrs. Lilian Isagani</p>
+              <p>Mrs. Annabel Delos Reyes</p>
+              <p>Mrs. Grace See</p>
+              <p>Mrs. Ester Briñas</p>
+              <p>Mrs. Rhoda Paule</p>
+              <p>Mrs. Josie Agad</p>
+              <p>Mrs. Nilda Monteroso</p>
+              <p>Mrs. Jobelle Comia-Ramirez</p>
+            </div>
+          </div>
+
+          <div className="wedding-party-grid">
+            <div className="party-group">
+              <div className="role-block">
+                <h4>Best Man</h4>
+                <p>Mr. Angelo Britanico</p>
+              </div>
+              <div className="role-block">
+                <h4>Groomsmen</h4>
+                <p>Mr. Gian Rosali</p>
+                <p>Mr. Emman Baes</p>
+                <p>Mr. Anthony Britanico</p>
+                <p>Mr. Christopher Pacinio</p>
+                <p>Mr. John Lemuel Capeña</p>
+                <p>Mr. John Mark Llobrera</p>
+                <p>Mr. Felix Agad Jr.</p>
+                <p>Mr. Marc Amberlanz Aquino</p>
+              </div>
+            </div>
+
+            <div className="party-group">
+              <div className="role-block">
+                <h4>Maid of Honor</h4>
+                <p>Ms. Francheska Louise Enad</p>
+              </div>
+              <div className="role-block">
+                <h4>Bridesmaids</h4>
+                <p>Ms. Brizia Zamudio</p>
+                <p>Ms. Angel Mikhayelle Frias</p>
+                <p>Ms. Ann Lhoucell Oflian De Leon</p>
+                <p>Ms. Kuryn Casinillo</p>
+                <p>Ms. Romela Agad</p>
+                <p>Ms. Roshel Agad</p>
+                <p>Ms. Celine Agad</p>
+                <p>Ms. Rowella Agad</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 className="section-subtitle">Secondary Sponsors</h3>
+          <div className="secondary-grid">
+            <div className="secondary-item">
+              <h5>To Light Our Path</h5>
+              <p>Hon. Rizalino Ferrer</p>
+              <p>Mrs. Judith Cruz</p>
+            </div>
+            <div className="secondary-item">
+              <h5>To Clothe Us As One</h5>
+              <p>Mrs. Rhoda Paule</p>
+              <p>Mr. Jonathan Rosali</p>
+            </div>
+            <div className="secondary-item">
+              <h5>To Bind Us Together</h5>
+              <p>Mr. Armando Agad</p>
+              <p>Mrs. Josie Agad</p>
+            </div>
+          </div>
+
+          <div className="bearers-grid">
+            <div className="bearer-item">
+              <h5>Ring Bearer</h5>
+              <p>Alonso Britanico</p>
+            </div>
+            <div className="bearer-item">
+              <h5>Coin Bearer</h5>
+              <p>Steve Zion Agad</p>
+            </div>
+            <div className="bearer-item">
+              <h5>Bible Bearer</h5>
+              <p>Gio Rosali</p>
+            </div>
+          </div>
+
+          <div className="flower-girls">
+            <h5>Flower Girls</h5>
+            <p>Dana Brielle L. Arquero</p>
+            <div className="flower-girls-sub">
+              <p>Ruemiah Espaldon</p>
+              <p>Cristina Rose</p>
+              <p>Felicity Quijano</p>
+              <p>Yana Rosali</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div ref={pageRefs[3]} className="page attire-section">
         <div className="attire-container">
           <div className="attire-header">
@@ -567,7 +702,7 @@ useEffect(() => {
       >
         <p style={{ whiteSpace: 'pre-line', textAlign: 'center' }}>{errorModal.message}</p>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-          <button className="continue-btn enabled" onClick={handleCloseAll}>CLOSE</button>
+          {/* <button className="continue-btn enabled" onClick={handleCloseAll}>CLOSE</button> */}
         </div>
       </Modal>
 

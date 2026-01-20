@@ -15,9 +15,9 @@ html, body {
   background: #242424;
   color: white;
   font-family: 'DM Serif Text', serif;
-  overflow-x: hidden; /* Prevent horizontal jitter */
+  overflow-x: auto; /* Prevent horizontal jitter */
   /* verflow-x: hidden; */
-  overflow-y: auto; /* Pinapayagan na ang vertical scrolling */
+  overflow-y: visible; /* Pinapayagan na ang vertical scrolling */
   height: auto;     /* Iniiwasan ang pag-lock sa 100% height */
   -webkit-overflow-scrolling: touch; /* Para smooth sa iPhone/Android */
 }
@@ -50,6 +50,11 @@ html, body {
   color: white;
   animation: heartFall linear infinite;
 }
+
+.heart-loader.hidden {
+  display: none !important;
+}
+
 .loader-text-container {
   z-index: 10;
   text-align: center;
@@ -144,14 +149,15 @@ html, body {
 ========================= */
 .page {
   min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
   background-size: cover;
   background-position: center;
   position: relative;
-  opacity: 0;
-  transform: translateY(20px);
+  opacity: 1 !important;
+  transform: none !important;
   transition: 0.6s ease;
 }
 
@@ -1725,5 +1731,112 @@ input.uppercase {
   }
   .footer-signature p {
     font-size: 0.7rem;
+  }
+}
+
+/* --- Entourage Section Specific Styles --- */
+
+.entourage-section {
+  background-color: #f4f8fb; /* Light airy blue background */
+  padding: 100px 20px;
+}
+
+.entourage-container {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  color: #5a7d95; /* Dusty blue text color */
+}
+
+/* Script Title (The Entourage) */
+.entourage-main-title {
+  font-family: 'Great Vibes', cursive; /* Ensure this font is linked in your HTML */
+  font-size: 4.5rem;
+  font-weight: 400;
+  margin-bottom: 40px;
+  color: #4a6a8a;
+}
+
+/* Subtitles (Principal Sponsors, etc.) */
+.section-subtitle {
+  font-family: 'Great Vibes', cursive;
+  font-size: 2.5rem;
+  margin: 40px 0 20px;
+  font-weight: 400;
+}
+
+/* Role Labels (PARENTS OF THE GROOM, etc.) */
+.entourage-container h4, 
+.entourage-container h5 {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 2.5px;
+  color: #9eb1c0;
+  margin-bottom: 8px;
+  margin-top: 15px;
+}
+
+/* Names Styling */
+.entourage-container p {
+  margin: 4px 0;
+  font-size: 1.1rem;
+  color: #444;
+  font-family: 'Playfair Display', serif;
+}
+
+/* Grid Layouts */
+.parents-grid, 
+.sponsors-grid, 
+.wedding-party-grid, 
+.secondary-grid, 
+.bearers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+/* Sponsor Columns (Left-aligned text to match image) */
+.sponsor-col {
+  text-align: left;
+  padding: 0 20px;
+}
+
+.sponsor-col p {
+  font-size: 1rem;
+}
+
+/* Secondary & Bearers Grid (3 columns for wider view) */
+.secondary-grid, 
+.bearers-grid {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* Flower Girls layout */
+.flower-girls-sub {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+/* Responsive: Stack columns on mobile */
+@media (max-width: 768px) {
+  .parents-grid, 
+  .sponsors-grid, 
+  .wedding-party-grid, 
+  .secondary-grid, 
+  .bearers-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .entourage-main-title {
+    font-size: 3rem;
+  }
+  
+  .sponsor-col {
+    text-align: center;
   }
 }
