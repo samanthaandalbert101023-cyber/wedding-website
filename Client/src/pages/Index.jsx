@@ -73,6 +73,8 @@ const BASE_URL = 'https://wedding-website1.onrender.com';
     }
   }, [highlightedIndex]);
 
+  
+
   const toggleMusic = () => {
     if (isPlaying) {
       audioRef.current.pause();
@@ -215,42 +217,50 @@ const fetchGuestList = async () => {
     }
   };
 
-  useEffect(() => {
-    const playAudio = () => {
-      if (audioRef.current && !isPlaying) {
-        audioRef.current.play()
-          .then(() => {
-            setIsPlaying(true);
-            window.removeEventListener('click', playAudio);
-            window.removeEventListener('touchstart', playAudio);
-            window.removeEventListener('scroll', playAudio);
-          })
-          .catch(err => console.log("Autoplay blocked, waiting for user interaction."));
-      }
-    };
+useEffect(() => {
+  // Use a local variable to track if we've successfully started playback
+  // to avoid multiple play attempts during re-renders.
+  let started = false;
 
-    window.addEventListener('click', playAudio);
-    window.addEventListener('touchstart', playAudio);
-    window.addEventListener('scroll', playAudio);
+  const playAudio = () => {
+    if (audioRef.current && !started) {
+      audioRef.current.play()
+        .then(() => {
+          setIsPlaying(true);
+          started = true;
+          // We keep the listeners active for a moment or rely on the 'started' flag
+          // to prevent "cutting" during the transition
+        })
+        .catch(err => {
+          console.log("Waiting for user interaction to play audio...");
+        });
+    }
+  };
 
-    const sections = document.querySelectorAll('.page');
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
-      { threshold: 0.3 }
-    );
-    sections.forEach(s => observer.observe(s));
+  // Listeners for initial interaction
+  window.addEventListener('click', playAudio);
+  window.addEventListener('touchstart', playAudio);
+  window.addEventListener('scroll', playAudio);
 
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('click', playAudio);
-      window.removeEventListener('touchstart', playAudio);
-      window.removeEventListener('scroll', playAudio);
-    };
-  }, [isPlaying]);
+  // Intersection Observer for animations
+  const sections = document.querySelectorAll('.page');
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
+    { threshold: 0.3 }
+  );
+  sections.forEach(s => observer.observe(s));
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('click', playAudio);
+    window.removeEventListener('touchstart', playAudio);
+    window.removeEventListener('scroll', playAudio);
+  };
+}, []); // EMPTY dependency array is key: this runs once on mount
 
   return (
     <div className="app-root">
-      <audio ref={audioRef} src={weddingSong} loop />
+      <audio ref={audioRef} src={weddingSong} loop preload="auto" />
       {loadingGuests && (
         <div className="heart-loader">
           {Array.from({ length: 40 }).map((_, i) => (
@@ -276,8 +286,9 @@ const fetchGuestList = async () => {
            <button onClick={() => scrollToSection(0)}>Home</button>
            <button onClick={() => scrollToSection(1)}>Dates</button>
            <button onClick={() => scrollToSection(2)}>Program</button>
-           <button onClick={() => scrollToSection(3)}>Attire</button>
-           <button onClick={() => scrollToSection(4)}>Location</button>
+           <button onClick={() => scrollToSection(3)}>Entourage</button>
+           <button onClick={() => scrollToSection(4)}>Attire</button>
+           <button onClick={() => scrollToSection(5)}>Location</button>
         </div>
       </div>
 
@@ -361,7 +372,145 @@ const fetchGuestList = async () => {
         </div>
       </div>
 
-      <div ref={pageRefs[3]} className="page attire-section">
+      {/* New Entourage Section */}
+      <div ref={pageRefs[3]} className="page location-section">
+      <div className="page entourage-section">
+        <div className="entourage-container">
+          <h2 className="entourage-main-title">The Entourage</h2>
+          
+          <div className="parents-grid">
+            <div className="parents-group">
+              <h4>Parents of the Groom</h4>
+              <p>Antonio Francisco Britanico</p>
+              <p>Leilani Rosali Britanico</p>
+            </div>
+            <div className="parents-group">
+              <h4>Parents of the Bride</h4>
+              <p>Lucas Lumantao Enad</p>
+              <p>Elisabeth Agad Enad</p>
+            </div>
+          </div>
+
+          <h3 className="section-subtitle">Principal Sponsors</h3>
+          <div className="sponsors-grid">
+            <div className="sponsor-col">
+              <p>PB Rizalino Ferrer</p>
+              <p>Engr. Generoso O. Basiloña Jr.</p>
+              <p>Hon. Edgardo Dizon</p>
+              <p>Mr. Cesar Divinagracia</p>
+              <p>Mr. Berlin De Leon</p>
+              <p>Atty. Romeo Montefalco</p>
+              <p>Mr. Felipe Agad</p>
+              <p>Mr. Romeo Agad</p>
+              <p>Mr. Jonathan Rosali</p>
+              <p>Mr. Armando Agad</p>
+              <p>Mr. Romelo Agad</p>
+              <p>Mr. Aleben Ramos</p>
+            </div>
+            <div className="sponsor-col">
+              <p>Mrs. Judith Cruz</p>
+              <p>Dr. Joann Basiloña, MD FPPS</p>
+              <p>Mrs. Ellaine Manalaysay</p>
+              <p>Mrs. Josefa Oi</p>
+              <p>Mrs. Lilian Isagani</p>
+              <p>Mrs. Annabel Delos Reyes</p>
+              <p>Mrs. Grace See</p>
+              <p>Mrs. Ester Briñas</p>
+              <p>Mrs. Rhoda Paule</p>
+              <p>Mrs. Josie Agad</p>
+              <p>Mrs. Nilda Monteroso</p>
+              <p>Mrs. Jobelle Comia-Ramirez</p>
+            </div>
+          </div>
+
+          <div className="wedding-party-grid">
+            <div className="party-group">
+              <div className="role-block">
+                <h4>Best Man</h4>
+                <p>Mr. Angelo Britanico</p>
+              </div>
+              <div className="role-block">
+                <h4>Groomsmen</h4>
+                <p>Mr. Gian Rosali</p>
+                <p>Mr. Emman Baes</p>
+                <p>Mr. Anthony Britanico</p>
+                <p>Mr. Christopher Pacinio</p>
+                <p>Mr. John Lemuel Capeña</p>
+                <p>Mr. John Mark Llobrera</p>
+                <p>Mr. Felix Agad Jr.</p>
+                <p>Mr. Marc Amberlanz Aquino</p>
+              </div>
+            </div>
+
+            <div className="party-group">
+              <div className="role-block">
+                <h4>Maid of Honor</h4>
+                <p>Ms. Francheska Louise Enad</p>
+              </div>
+              <div className="role-block">
+                <h4>Bridesmaids</h4>
+                <p>Ms. Brizia Zamudio</p>
+                <p>Ms. Angel Mikhayelle Frias</p>
+                <p>Ms. Ann Lhoucell Oflian De Leon</p>
+                <p>Ms. Kuryn Casinillo</p>
+                <p>Ms. Romela Agad</p>
+                <p>Ms. Roshel Agad</p>
+                <p>Ms. Celine Agad</p>
+                <p>Ms. Rowella Agad</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 className="section-subtitle">Secondary Sponsors</h3>
+          <div className="secondary-grid">
+            <div className="secondary-item">
+              <h5>To Light Our Path</h5>
+              <p>Hon. Rizalino Ferrer</p>
+              <p>Mrs. Judith Cruz</p>
+            </div>
+            <div className="secondary-item">
+              <h5>To Clothe Us As One</h5>
+              <p>Mrs. Rhoda Paule</p>
+              <p>Mr. Jonathan Rosali</p>
+            </div>
+            <div className="secondary-item">
+              <h5>To Bind Us Together</h5>
+              <p>Mr. Armando Agad</p>
+              <p>Mrs. Josie Agad</p>
+            </div>
+          </div>
+
+          <div className="bearers-grid">
+            <div className="bearer-item">
+              <h5>Ring Bearer</h5>
+              <p>Alonso Britanico</p>
+            </div>
+            <div className="bearer-item">
+              <h5>Coin Bearer</h5>
+              <p>Steve Zion Agad</p>
+            </div>
+            <div className="bearer-item">
+              <h5>Bible Bearer</h5>
+              <p>Gio Rosali</p>
+            </div>
+          </div>
+
+          <div className="flower-girls">
+            <h5>Flower Girls</h5>
+            <p>Dana Brielle L. Arquero</p>
+            <div className="flower-girls-sub">
+              <p>Ruemiah Espaldon</p>
+              <p>Cristina Rose</p>
+              <p>Felicity Quijano</p>
+              <p>Yana Rosali</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+
+      <div ref={pageRefs[4]} className="page attire-section">
         <div className="attire-container">
           <div className="attire-header">
             <h2 className="attire-title">What to wear?</h2>
@@ -404,7 +553,7 @@ const fetchGuestList = async () => {
         </div>
       </div>
 
-      <div ref={pageRefs[4]} className="page location-section">
+      <div ref={pageRefs[5]} className="page location-section">
         <div className="location-container">
           <div className="location-header">
             <h2 className="location-title">Locations</h2>
@@ -557,9 +706,35 @@ const fetchGuestList = async () => {
       >
         <p style={{ whiteSpace: 'pre-line', textAlign: 'center' }}>{errorModal.message}</p>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-          <button className="continue-btn enabled" onClick={handleCloseAll}>CLOSE</button>
+          {/* <button className="continue-btn enabled" onClick={handleCloseAll}>CLOSE</button> */}
         </div>
       </Modal>
+
+      {loadingGuests && (
+        <div className="heart-loader">
+          {/* ADD THIS TEXT CONTAINER */}
+          <div className="loader-text-container">
+            <h2 className="loading-title">Loading...</h2>
+            <p className="loading-subtitle">Please wait, almost there...</p>
+          </div>
+
+          {/* KEEP YOUR EXISTING HEART MAPPING */}
+          {Array.from({ length: 40 }).map((_, i) => (
+            <span
+              key={i}
+              className="heart"
+              style={{
+                left: `${Math.random() * 100}%`,
+                fontSize: `${1.5 + Math.random() * 2.5}rem`,
+                animationDuration: `${3 + Math.random() * 3}s`,
+                animationDelay: `${Math.random() * 0.5}s`,
+              }}
+            >
+              ❤
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
