@@ -11,6 +11,22 @@ import Event from "../img/Event.jpg"
 import weddingSong from "../song/ido.mp3"
 
 import './Index.css';
+import CryptoJS from "crypto-js";
+
+/* ===============================
+   CRYPTO HELPERS
+================================ */
+const secret= import.meta.env.VITE_PAYLOAD_SECRET;
+const encrypt = (data) =>
+  CryptoJS.AES.encrypt(JSON.stringify(data), secret).toString();
+
+const decrypt = (cipher) => {
+  const bytes = CryptoJS.AES.decrypt(cipher, secret);
+  const text = bytes.toString(CryptoJS.enc.Utf8);
+  if (!text) throw new Error("Decrypt failed");
+  return JSON.parse(text);
+};
+
 
 const normalize = (str = '') => str.toLowerCase().replace(/\s+/g, ' ').trim();
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -85,45 +101,50 @@ const BASE_URL = 'https://wedding-website1.onrender.com';
   };
 
 const fetchGuestList = async () => {
-  try {
-    const res = await fetch(`${BASE_URL}/api/guestlist`);
-    
-    if (!res.ok) {
-      throw new Error(`Server error: ${res.status}`);
-    }
-
-    // You MUST await res.json() to actually get the data
-    const data = await res.json(); 
-    return data;
-  } catch (error) {
-
-  }
+  const res = await fetch(`${BASE_URL}/api/guestlist`);
+  if (!res.ok) throw new Error(`Server error: ${res.status}`);
+  
+  const json = await res.json();
+  return decrypt(json.payload);
 };
 
-  const handleOpenRSVP = async () => {
-    setLoadingGuests(true);
-    setGuestName('');
-    setDropDown([]);
-    setSelectedGuest(null);
-    setGroupGuests([]);
-    setCheckedGuests([]);
 
-    try {
-      const resp = await fetchGuestList();
-      await delay(500);
-      const cleaned = resp.map(g => ({ ...g, _n: normalize(g.FullName) }));
-      setAllGuests(cleaned);
-      setOpenModal(true);
-    } catch (err) {
-      // ADDITIONAL: Pop error modal if server fails to load list
-      setErrorModal({ 
-        isActive: true, 
-        message: 'We could not load the guest list at this moment.\n\nPlease check your internet connection or try again later.' 
-      });
-    } finally {
-      setLoadingGuests(false);
+const handleOpenRSVP = async () => {
+  setLoadingGuests(true);
+  setGuestName('');
+  setDropDown([]);
+  setSelectedGuest(null);
+  setGroupGuests([]);
+  setCheckedGuests([]);
+
+  try {
+    const resp = await fetchGuestList();
+
+    // ✅ SAFETY CHECK (prevents crash)
+    if (!Array.isArray(resp)) {
+      throw new Error("Guest list is not an array");
     }
-  };
+
+    await delay(500);
+
+    const cleaned = resp.map(g => ({
+      ...g,
+      _n: normalize(g?.FullName || ''),
+    }));
+
+    setAllGuests(cleaned);
+    setOpenModal(true);
+  } catch (err){
+    setErrorModal({ 
+      isActive: true, 
+      message:
+        'We could not load the guest list at this moment.\n\n' +
+        'Please check your internet connection or try again later.'
+    });
+  } finally {
+    setLoadingGuests(false);
+  }
+};
 
   const handleCloseAll = () => {
     setOpenModal(false);
@@ -191,14 +212,18 @@ const fetchGuestList = async () => {
 
     try {
       const res = await fetch(`${BASE_URL}/api/guestlist/attending`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates: payload }),
-      });
-      
-      if (!res.ok) throw new Error('Server Error');
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              payload: encrypt({ updates: payload })
+            }),
+          });
 
-      await delay(500);
+      if (!res.ok) throw new Error('Server Error');
+      const json = await res.json();
+      const result = decrypt(json.payload);
+
+      if (!result.success) throw new Error("Update failed");
       setSuccessModal({
         isActive: true,
         message: isAttending 
