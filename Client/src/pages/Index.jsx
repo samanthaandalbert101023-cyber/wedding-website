@@ -12,6 +12,68 @@ import weddingSong from "../song/ido.mp3"
 
 import './Index.css';
 
+// --- hex helpers ---
+const hexToBytes = (hex) =>
+  Uint8Array.from(hex.match(/.{1,2}/g).map(b => parseInt(b, 16)));
+
+const bytesToHex = (bytes) =>
+  [...bytes].map(b => b.toString(16).padStart(2, "0")).join("");
+
+// --- import AES key ---
+const getKey = async () => {
+  const keyHex = import.meta.env.VITE_API_SECRET_KEY;
+
+  return crypto.subtle.importKey(
+    "raw",
+    hexToBytes(keyHex),
+    "AES-GCM",
+    false,
+    ["encrypt", "decrypt"]
+  );
+};
+
+export const decryptPayload = async (payload) => {
+  const key = await getKey();
+
+  const iv = hexToBytes(payload.iv);
+  const data = hexToBytes(payload.data);
+  const tag = hexToBytes(payload.tag);
+
+  // AES-GCM expects ciphertext + tag combined
+  const combined = new Uint8Array([...data, ...tag]);
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    combined
+  );
+
+  return JSON.parse(new TextDecoder().decode(decrypted));
+};
+
+export const encryptPayload = async (data) => {
+  const key = await getKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const encoded = new TextEncoder().encode(JSON.stringify(data));
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    encoded
+  );
+
+  const encryptedBytes = new Uint8Array(encrypted);
+
+  return {
+    iv: bytesToHex(iv),
+    data: bytesToHex(encryptedBytes.slice(0, -16)),
+    tag: bytesToHex(encryptedBytes.slice(-16)),
+  };
+};
+
+
+
 const normalize = (str = '') => str.toLowerCase().replace(/\s+/g, ' ').trim();
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -23,6 +85,7 @@ const Index = () => {
 //   ? 'http://192.168.3.7:5173/'
 //   : 'https://wedding-website1.onrender.com';
 const BASE_URL = 'https://wedding-website1.onrender.com';
+//const BASE_URL = 'http://localhost:5000';
 
   const [loadingGuests, setLoadingGuests] = useState(false);
   const [successModal, setSuccessModal] = useState({ isActive: false, message: '' });
@@ -85,20 +148,26 @@ const BASE_URL = 'https://wedding-website1.onrender.com';
   };
 
 const fetchGuestList = async () => {
-  try {
-    const res = await fetch(`${BASE_URL}/api/guestlist`);
-    
-    if (!res.ok) {
-      throw new Error(`Server error: ${res.status}`);
+  const res = await fetch(`${BASE_URL}/api/guestlist`);
+  if (!res.ok) throw new Error("Server error");
+
+  const json = await res.json();
+  console.log("RAW RESPONSE:", json);
+
+  if (json.encrypted) {
+    try {
+      const decrypted = await decryptPayload(json.payload);
+      console.log("DECRYPTED DATA:", decrypted);
+      return decrypted;
+    } catch (e) {
+      console.error("❌ DECRYPT FAILED:", e);
+      throw e;
     }
-
-    // You MUST await res.json() to actually get the data
-    const data = await res.json(); 
-    return data;
-  } catch (error) {
-
   }
+
+  return json;
 };
+
 
   const handleOpenRSVP = async () => {
     setLoadingGuests(true);
@@ -171,51 +240,63 @@ const fetchGuestList = async () => {
     );
   };
 
-  const submitAttendance = async (isAttending) => {
-    setLoadingGuests(true);
+const submitAttendance = async (isAttending) => {
+  setLoadingGuests(true);
 
-    let finalCheckedList = [...checkedGuests];
-    
-    if (!isAttending && selectedGuest) {
-      finalCheckedList = finalCheckedList.filter(name => name !== selectedGuest.FullName);
-    } else if (isAttending && selectedGuest) {
-      if (!finalCheckedList.includes(selectedGuest.FullName)) {
-        finalCheckedList.push(selectedGuest.FullName);
-      }
+  let finalCheckedList = [...checkedGuests];
+  
+  if (!isAttending && selectedGuest) {
+    finalCheckedList = finalCheckedList.filter(
+      name => name !== selectedGuest.FullName
+    );
+  } else if (isAttending && selectedGuest) {
+    if (!finalCheckedList.includes(selectedGuest.FullName)) {
+      finalCheckedList.push(selectedGuest.FullName);
     }
+  }
 
-    const payload = groupGuests.map(g => ({
-      ...g,
-      attending: finalCheckedList.includes(g.FullName),
-    }));
+  // ✅ SAME LOGIC
+  const updates = groupGuests.map(g => ({
+    ...g,
+    attending: finalCheckedList.includes(g.FullName),
+  }));
 
-    try {
-      const res = await fetch(`${BASE_URL}/api/guestlist/attending`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates: payload }),
-      });
-      
-      if (!res.ok) throw new Error('Server Error');
+  try {
+    // 🔐 ENCRYPT HERE (ONLY ADDITION)
+    const encryptedPayload = await encryptPayload(updates);
 
-      await delay(500);
-      setSuccessModal({
-        isActive: true,
-        message: isAttending 
-          ? 'Thank you for your response! 💕\n\nYour attendance has been successfully recorded.'
-          : 'Thank you for letting us know 🤍\n\nWhile we’ll miss celebrating with you, we truly appreciate your response.',
-      });
-      setOpenGroupModal(false);
-    } catch (err) {
-      // ADDITIONAL: Specific error modal for submission failure
-      setErrorModal({ 
-        isActive: true, 
-        message: 'Something went wrong while saving your response 🤍\n\nPlease try again or contact us directly.' 
-      });
-    } finally {
-      setLoadingGuests(false);
-    }
-  };
+    const res = await fetch(`${BASE_URL}/api/guestlist/attending`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        encrypted: true,
+        payload: encryptedPayload,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Server Error");
+
+    await delay(500);
+
+    setSuccessModal({
+      isActive: true,
+      message: isAttending
+        ? "Thank you for your response! 💕\n\nYour attendance has been successfully recorded."
+        : "Thank you for letting us know 🤍\n\nWhile we’ll miss celebrating with you, we truly appreciate your response.",
+    });
+
+    setOpenGroupModal(false);
+  } catch (err) {
+    setErrorModal({
+      isActive: true,
+      message:
+        "Something went wrong while saving your response 🤍\n\nPlease try again or contact us directly.",
+    });
+  } finally {
+    setLoadingGuests(false);
+  }
+};
+
 
 useEffect(() => {
   // Use a local variable to track if we've successfully started playback
