@@ -180,10 +180,10 @@ const fetchGuestList = async () => {
   if (json.encrypted) {
     try {
       const decrypted = await decryptPayload(json.payload);
-    //  console.log("DECRYPTED DATA:", decrypted);
+      console.log("DECRYPTED DATA:", decrypted);
       return decrypted;
     } catch (e) {
-    //  console.error("❌ DECRYPT FAILED:", e);
+       console.error("❌ DECRYPT FAILED:", e);
       throw e;
     }
   }
