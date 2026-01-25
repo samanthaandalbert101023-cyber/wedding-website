@@ -191,6 +191,13 @@ const fetchGuestList = async () => {
       return decrypted;
     } catch (e) {
        console.error("❌ DECRYPT FAILED:", e);
+       console.log(
+        "KEY:",
+        import.meta.env.VITE_API_SECRET_KEY,
+        "LEN:",
+        import.meta.env.VITE_API_SECRET_KEY?.length
+      );
+
       throw e;
     }
   }
