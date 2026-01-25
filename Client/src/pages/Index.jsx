@@ -13,24 +13,38 @@ import weddingSong from "../song/ido.mp3"
 import './Index.css';
 
 // --- hex helpers ---
-const hexToBytes = (hex) =>
-  Uint8Array.from(hex.match(/.{1,2}/g).map(b => parseInt(b, 16)));
+const hexToBytes = (hex) => {
+  if (typeof hex !== "string" || hex.length % 2 !== 0) {
+    throw new Error("Invalid hex string");
+  }
+  return Uint8Array.from(
+    hex.match(/.{1,2}/g).map(b => parseInt(b, 16))
+  );
+};
 
 const bytesToHex = (bytes) =>
   [...bytes].map(b => b.toString(16).padStart(2, "0")).join("");
 
 // --- import AES key ---
-const getKey = async () => {
-  const keyHex = import.meta.env.VITE_API_SECRET_KEY;
+let cachedKey = null;
 
-  return crypto.subtle.importKey(
+const getKey = async () => {
+  if (cachedKey) return cachedKey;
+
+  const keyHex = import.meta.env.VITE_API_SECRET_KEY;
+  if (!keyHex) throw new Error("Missing AES key");
+
+  cachedKey = await crypto.subtle.importKey(
     "raw",
     hexToBytes(keyHex),
     "AES-GCM",
     false,
     ["encrypt", "decrypt"]
   );
+
+  return cachedKey;
 };
+
 
 export const decryptPayload = async (payload) => {
   const key = await getKey();
@@ -152,15 +166,15 @@ const fetchGuestList = async () => {
   if (!res.ok) throw new Error("Server error");
 
   const json = await res.json();
-  console.log("RAW RESPONSE:", json);
+  //console.log("RAW RESPONSE:", json);
 
   if (json.encrypted) {
     try {
       const decrypted = await decryptPayload(json.payload);
-      console.log("DECRYPTED DATA:", decrypted);
+    //  console.log("DECRYPTED DATA:", decrypted);
       return decrypted;
     } catch (e) {
-      console.error("❌ DECRYPT FAILED:", e);
+    //  console.error("❌ DECRYPT FAILED:", e);
       throw e;
     }
   }
@@ -313,7 +327,7 @@ useEffect(() => {
           // to prevent "cutting" during the transition
         })
         .catch(err => {
-          console.log("Waiting for user interaction to play audio...");
+         // console.log("Waiting for user interaction to play audio...");
         });
     }
   };
