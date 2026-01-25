@@ -55,12 +55,13 @@ const db = admin.firestore();
 ================================ */
 const ALGORITHM = "aes-256-gcm";
 
-if (!process.env.API_SECRET_KEY) {
-  console.error("❌ API_SECRET_KEY missing");
+if (!process.env.PAYLOAD_SECRET) {
+  console.error("❌ PAYLOAD_SECRET missing");
   process.exit(1);
 }
+console.log("BACKEND KEY LEN:", process.env.PAYLOAD_SECRET?.length);
 
-const SECRET_KEY = Buffer.from(process.env.API_SECRET_KEY, "hex");
+const SECRET_KEY = Buffer.from(process.env.PAYLOAD_SECRET, "hex");
 
 /* ===============================
    CRYPTO HELPERS
