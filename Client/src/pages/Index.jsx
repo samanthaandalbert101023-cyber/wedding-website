@@ -31,7 +31,7 @@ let cachedKey = null;
 const getKey = async () => {
   if (cachedKey) return cachedKey;
 
-  const keyHex = import.meta.env.VITE_API_SECRET_KEY;
+  const keyHex = import.meta.env.VITE_PAYLOAD_SECRET;
   if (!keyHex) throw new Error("Missing AES key");
 
   cachedKey = await crypto.subtle.importKey(
