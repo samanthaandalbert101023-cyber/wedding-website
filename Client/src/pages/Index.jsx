@@ -179,7 +179,7 @@ const fetchGuestList = async () => {
 
     try {
       const resp = await fetchGuestList();
-      await delay(500);
+      // await delay(500);
       const cleaned = resp.map(g => ({ ...g, _n: normalize(g.FullName) }));
       setAllGuests(cleaned);
       setOpenModal(true);
