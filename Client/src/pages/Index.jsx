@@ -47,13 +47,21 @@ const getKey = async () => {
 
 
 export const decryptPayload = async (payload) => {
+  if (
+    !payload ||
+    typeof payload.iv !== "string" ||
+    typeof payload.data !== "string" ||
+    typeof payload.tag !== "string"
+  ) {
+    throw new Error("Invalid encrypted payload");
+  }
+
   const key = await getKey();
 
   const iv = hexToBytes(payload.iv);
   const data = hexToBytes(payload.data);
   const tag = hexToBytes(payload.tag);
 
-  // AES-GCM expects ciphertext + tag combined
   const combined = new Uint8Array([...data, ...tag]);
 
   const decrypted = await crypto.subtle.decrypt(
@@ -64,6 +72,7 @@ export const decryptPayload = async (payload) => {
 
   return JSON.parse(new TextDecoder().decode(decrypted));
 };
+
 
 export const encryptPayload = async (data) => {
   const key = await getKey();
