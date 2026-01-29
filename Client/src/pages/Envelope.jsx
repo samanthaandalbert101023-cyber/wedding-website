@@ -8,7 +8,6 @@ const Envelope = ({ onOpenComplete }) => {
 
   useEffect(() => {
     const hasOpened = localStorage.getItem('invitationOpened');
-    console.log('hasOpened', hasOpened)
     if (hasOpened === 'true') {
       navigate('/Index', { replace: true });
     }

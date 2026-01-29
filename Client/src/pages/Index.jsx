@@ -176,15 +176,12 @@ const fetchGuestList = async () => {
   if (!res.ok) throw new Error("Server error");
 
   const json = await res.json();
-  //console.log("RAW RESPONSE:", json);
 
   if (json.encrypted) {
     try {
       const decrypted = await decryptPayload(json.payload);
-      //console.log("DECRYPTED DATA:", decrypted);
       return decrypted;
     } catch (e) {
-      //console.error("❌ DECRYPT FAILED:", e);
       throw e;
     }
   }
@@ -333,8 +330,6 @@ useEffect(() => {
         .then(() => {
           setIsPlaying(true);
           started = true;
-          // We keep the listeners active for a moment or rely on the 'started' flag
-          // to prevent "cutting" during the transition
         })
         .catch(err => {
          // console.log("Waiting for user interaction to play audio...");
