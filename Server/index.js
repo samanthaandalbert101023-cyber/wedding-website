@@ -27,13 +27,13 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
       JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
     ),
   });
-  console.log("✅ Firebase Admin initialized (PRODUCTION)");
+  
 } else {
   // LOCAL
   const serviceAccountPath = path.join(__dirname, "firebase-admin.json");
 
   if (!fs.existsSync(serviceAccountPath)) {
-    console.error("❌ firebase-admin.json missing");
+    
     process.exit(1);
   }
 
@@ -45,7 +45,6 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     credential: admin.credential.cert(serviceAccount),
   });
 
-  console.log("✅ Firebase Admin initialized (LOCAL)");
 }
 
 const db = admin.firestore();
@@ -56,10 +55,8 @@ const db = admin.firestore();
 const ALGORITHM = "aes-256-gcm";
 
 if (!process.env.PAYLOAD_SECRET) {
-  console.error("❌ PAYLOAD_SECRET missing");
   process.exit(1);
 }
-console.log("BACKEND KEY LEN:", process.env.PAYLOAD_SECRET?.length);
 
 const SECRET_KEY = Buffer.from(process.env.PAYLOAD_SECRET, "hex");
 
@@ -153,7 +150,6 @@ app.get("/api/guestlist", async (_, res) => {
       payload: encrypt(guests),
     });
   } catch (err) {
-    console.error("❌ Guestlist error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -192,10 +188,39 @@ app.patch("/api/guestlist/attending", async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error("❌ Decryption / Update error:", err);
     res.status(400).json({ error: "Invalid encrypted payload" });
   }
 });
+
+app.get("/api/admin/guest-summary", async (req, res) => {
+  const key = req.query.key;
+
+  // 🚫 BLOCK IF KEY IS MISSING OR WRONG
+  if (!key || key !== process.env.ADMIN_DASHBOARD_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const snapshot = await db.collection("GuestList").get();
+
+    const guests = snapshot.docs.map(doc => ({
+      FullName: doc.data().FullName,
+      attending: Boolean(doc.data().attending),
+    }));
+
+    const attendingYes = guests.filter(g => g.attending).length;
+
+    res.json({
+      totalGuests: guests.length,
+      attendingYes,
+      attendingNo: guests.length - attendingYes,
+      guests,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load guest summary" });
+  }
+});
+
 
 /* ===============================
    START SERVER
