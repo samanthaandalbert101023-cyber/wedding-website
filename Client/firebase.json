@@ -8,8 +8,8 @@
     ],
     "rewrites": [
       {
-        "source": "https://rsvp-e-invite-738aa.web.app",
-        "destination": "https://albertandsamanthawedding.site"
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
   }
