@@ -8,9 +8,8 @@ const Envelope = ({ onOpenComplete }) => {
 
   useEffect(() => {
     const hasOpened = localStorage.getItem('invitationOpened');
-    console.log('hasOpened', hasOpened)
     if (hasOpened === 'true') {
-      navigate('/dashboard', { replace: true });
+      navigate('/Index', { replace: true });
     }
   }, [navigate]);
 
@@ -20,7 +19,7 @@ const Envelope = ({ onOpenComplete }) => {
     // 1. Call the completion prop logic if needed
     if (onOpenComplete) onOpenComplete();
     
-    // 2. Redirect to the dashboard
+    // 2. Redirect to the Index
     navigate('/Index', { replace: true}); 
   };
 
@@ -42,11 +41,11 @@ const Envelope = ({ onOpenComplete }) => {
                 <div className="letter-content">
                   <p className="invite-question">The Wedding of</p>
                   
-                  <h2 className="script-font">Samantha</h2>
-                  <span className="and-text">&</span>
                   <h2 className="script-font">Albert</h2>
+                  <span className="and-text">&</span>
+                  <h2 className="script-font">Samantha</h2>
                   
-                  <p className="date-font">FEBRUARY 14, 2025</p>
+                  <p className="date-font">FEBRUARY 14, 2026</p>
                   
                   <button 
                     className="enter-btn" 

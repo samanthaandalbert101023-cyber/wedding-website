@@ -1,0 +1,323 @@
+/* ======================
+   LAYOUT
+====================== */
+.admin-container h1{
+    color: #ffff;
+}
+.admin-container {
+  max-width: 960px;
+  margin: 32px auto;
+  padding: 0 16px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #111;
+}
+
+/* ======================
+   STATS CARDS
+====================== */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  padding: 20px;
+  border-radius: 14px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+/* Minimal color accents */
+.stat-card.yes {
+  background: #f6fbf8;
+}
+
+.stat-card.no {
+  background: #fdf7f7;
+}
+
+.stat-card.yes.active {
+  background: #eefaf3;
+}
+
+.stat-card.no.active {
+  background: #fdeeee;
+}
+
+
+.stat-card h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+
+.stat-card p {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0;
+  color: #111;
+}
+
+/* Hover */
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card:active {
+  transform: scale(0.98);
+}
+
+/* Active (selected filter) */
+.stat-card.active {
+  border-color: #111;
+  background: #fff;
+  box-shadow:
+    0 0 0 2px #111 inset,
+    0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* ======================
+   TABLE
+====================== */
+
+.guest-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e6e6e6;
+}
+
+.guest-table thead {
+  background: #fafafa;
+}
+
+.guest-table th {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.guest-table th,
+.guest-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+/* Table rows */
+.guest-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Always black, minimalist */
+.status-text {
+  color: #111;
+  font-weight: 500;
+}
+
+/* Remove legacy colors */
+.yes-text,
+.no-text {
+  color: #111;
+  font-weight: 500;
+}
+
+/* ======================
+   STATES
+====================== */
+
+.admin-loading,
+.admin-error {
+  text-align: center;
+  margin-top: 48px;
+  font-size: 16px;
+  color: #555;
+}
+
+.empty {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  font-style: italic;
+  color: #777;
+}
+
+/* ======================
+   RESPONSIVE
+====================== */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card p {
+    font-size: 28px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .guest-table th,
+  .guest-table td {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .stat-card {
+    padding: 18px;
+  }
+}
+
+/* SEARCH */
+.search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #111;
+}
+/* ======================
+   RESPONSIVE ENHANCEMENTS
+====================== */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card p {
+    font-size: 26px;
+  }
+
+  .search-input {
+    max-width: 100%;
+  }
+}
+
+/* ======================
+   MOBILE (STACKED TABLE)
+====================== */
+@media (max-width: 480px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide table header */
+  .guest-table thead {
+    display: none;
+  }
+
+  .guest-table {
+    border: none;
+    background: transparent;
+  }
+
+  .guest-table tr {
+    display: block;
+    margin-bottom: 14px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    padding: 12px 14px;
+  }
+
+  .guest-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border: none;
+    font-size: 14px;
+  }
+
+  /* Labels */
+  .guest-table td::before {
+    content: attr(data-label);
+    font-size: 12px;
+    color: #777;
+    font-weight: 500;
+  }
+
+  .stat-card {
+    padding: 18px;
+  }
+}
+/* Hover */
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Active (clicked) */
+.stat-card.active {
+  border-color: #111;
+  background: #fff;
+  box-shadow:
+    0 0 0 2px #111 inset,
+    0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Preserve semantic color */
+.stat-card.yes.active {
+  background: #eefaf3;
+}
+
+.stat-card.no.active {
+  background: #fdeeee;
+}
+
+/* Mobile tap feedback */
+.stat-card:active {
+  transform: scale(0.98);
+}
+
+.export-btn {
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.export-btn:hover {
+  opacity: 0.9;
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
